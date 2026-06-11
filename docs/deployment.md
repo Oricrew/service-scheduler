@@ -27,11 +27,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE=54
 ```
 
-Add these later when email notifications are implemented:
+## Docker
 
-```txt
-RESEND_API_KEY=
-EMAIL_FROM=
+Build the image:
+
+```sh
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="your-supabase-url" \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key" \
+  -t service-scheduler .
 ```
 
-Keep `SUPABASE_SERVICE_ROLE_KEY` server-only if it is added later.
+Run the container:
+
+```sh
+docker run --rm -p 3000:3000 service-scheduler
+```
