@@ -1,3 +1,5 @@
+import { PageShell } from "@/components/page-shell";
+
 type RoutePlaceholderProps = {
   eyebrow: string;
   title: string;
@@ -10,8 +12,8 @@ export function RoutePlaceholder({
   description,
 }: RoutePlaceholderProps) {
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-16 text-slate-900">
-      <section className="mx-auto max-w-3xl">
+    <PageShell>
+      <section>
         <p className="mb-3 text-sm font-bold uppercase tracking-wider text-slate-600">
           {eyebrow}
         </p>
@@ -22,6 +24,6 @@ export function RoutePlaceholder({
           {description}
         </p>
       </section>
-    </main>
+    </PageShell>
   );
 }
