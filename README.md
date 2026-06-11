@@ -83,5 +83,42 @@ The first version should include:
 
 ## Repository Status
 
-This repository currently contains planning documentation only. Application code has not been generated yet.
+This repository now contains the Phase 0 application foundation and planning documentation.
+
+## Development
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+Create local environment variables:
+
+```sh
+cp .env.example .env
+```
+
+Run locally:
+
+```sh
+npm run dev
+```
+
+Quality checks:
+
+```sh
+npm run lint
+npm run typecheck
+npm run format:check
+npm run build
+```
+
+## Deployment
+
+See [`docs/deployment.md`](./docs/deployment.md).
+
+## Current Status
+
+Phase 0 project foundation is complete. The app includes the Next.js foundation, Tailwind CSS, linting and formatting, `next-intl`, Supabase client helpers, initial route placeholders, responsive layout primitives, and Vercel deployment notes.
 
