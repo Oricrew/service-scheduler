@@ -6,6 +6,14 @@ import { routing } from "@/i18n/routing";
 
 type Locale = (typeof routing.locales)[number];
 
+const serviceTypes = [
+  "repair",
+  "maintenance",
+  "installation",
+  "quotationInspection",
+  "emergencyService",
+] as const;
+
 const requiredFields = [
   "name",
   "phone",
@@ -58,6 +66,40 @@ export default async function BookPage({
         </div>
 
         <form className="mt-10 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
+          <fieldset className="mb-8">
+            <legend className="text-sm font-bold text-slate-800">
+              {t("serviceType.label")}
+              <span className="ml-1 text-sky-700">{t("required")}</span>
+            </legend>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              {t("serviceType.description")}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {serviceTypes.map((serviceType) => (
+                <label
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4 transition hover:border-sky-300 hover:bg-sky-50/50"
+                  key={serviceType}
+                >
+                  <input
+                    className="mt-1 size-4 accent-sky-700"
+                    name="serviceType"
+                    required
+                    type="radio"
+                    value={t(`serviceType.options.${serviceType}.value`)}
+                  />
+                  <span>
+                    <span className="block text-sm font-black text-slate-900">
+                      {t(`serviceType.options.${serviceType}.label`)}
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-slate-500">
+                      {t(`serviceType.options.${serviceType}.description`)}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <div className="grid gap-5 md:grid-cols-2">
             {requiredFields.map((field) => (
               <label

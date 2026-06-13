@@ -63,6 +63,37 @@
     "description": "Share your contact details and equipment information. A supervisor will review the request before confirming the time.",
     "required": "*",
     "optional": "(optional)",
+    "serviceType": {
+      "label": "Service type",
+      "description": "Choose the option that best describes the visit you need.",
+      "options": {
+        "repair": {
+          "value": "repair",
+          "label": "Repair",
+          "description": "For equipment that is not working correctly."
+        },
+        "maintenance": {
+          "value": "maintenance",
+          "label": "Maintenance",
+          "description": "For cleaning, preventive checks, or tune-ups."
+        },
+        "installation": {
+          "value": "installation",
+          "label": "Installation",
+          "description": "For installing or replacing equipment."
+        },
+        "quotationInspection": {
+          "value": "quotation-inspection",
+          "label": "Quotation/inspection",
+          "description": "For evaluating the work before confirming it."
+        },
+        "emergencyService": {
+          "value": "emergency-service",
+          "label": "Emergency visit",
+          "description": "For urgent problems that need quick review."
+        }
+      }
+    },
     "fields": {
       "name": {
         "label": "Name",
@@ -101,7 +132,7 @@
         "placeholder": "Contact preferences, access notes, or other helpful details."
       }
     },
-    "reviewNotice": "This screen does not create the request yet. Service selection, time selection, and submission for approval will be added next.",
+    "reviewNotice": "This screen does not create the request yet. Time selection and submission for approval will be added next.",
     "cta": "Continue",
     "ctaNote": "Final confirmation stays pending until a supervisor reviews the request."
   }

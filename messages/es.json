@@ -63,6 +63,37 @@
     "description": "Completá tus datos y el detalle del equipo. El supervisor revisará la solicitud antes de confirmar el horario.",
     "required": "*",
     "optional": "(opcional)",
+    "serviceType": {
+      "label": "Tipo de servicio",
+      "description": "Elegí la opción que mejor describe la visita que necesitás.",
+      "options": {
+        "repair": {
+          "value": "repair",
+          "label": "Reparación",
+          "description": "Para equipos que no funcionan correctamente."
+        },
+        "maintenance": {
+          "value": "maintenance",
+          "label": "Mantenimiento",
+          "description": "Para limpieza, revisión preventiva o puesta a punto."
+        },
+        "installation": {
+          "value": "installation",
+          "label": "Instalación",
+          "description": "Para instalar o reemplazar un equipo."
+        },
+        "quotationInspection": {
+          "value": "quotation-inspection",
+          "label": "Presupuesto o inspección",
+          "description": "Para evaluar el trabajo antes de confirmarlo."
+        },
+        "emergencyService": {
+          "value": "emergency-service",
+          "label": "Visita de emergencia",
+          "description": "Para problemas urgentes que requieren revisión rápida."
+        }
+      }
+    },
     "fields": {
       "name": {
         "label": "Nombre",
@@ -101,7 +132,7 @@
         "placeholder": "Preferencias de contacto, referencias de acceso o detalles útiles."
       }
     },
-    "reviewNotice": "Esta pantalla todavía no crea la solicitud. En el próximo paso se agregará selección de servicio, horario y envío para aprobación.",
+    "reviewNotice": "Esta pantalla todavía no crea la solicitud. En próximos pasos se agregará selección de horario y envío para aprobación.",
     "cta": "Continuar",
     "ctaNote": "La confirmación final queda pendiente de revisión del supervisor."
   }
