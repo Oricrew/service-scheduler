@@ -55,5 +55,54 @@
       "description": "First, a clear public experience. Next, booking, approval, and internal scheduling flows can connect on this foundation.",
       "cta": "Request a visit"
     }
+  },
+  "Book": {
+    "brand": "Service Scheduler",
+    "eyebrow": "Appointment request",
+    "title": "Tell us what you need fixed.",
+    "description": "Share your contact details and equipment information. A supervisor will review the request before confirming the time.",
+    "required": "*",
+    "optional": "(optional)",
+    "fields": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Maria Gomez"
+      },
+      "phone": {
+        "label": "Phone",
+        "placeholder": "+54 11 1234-5678"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "maria@email.com"
+      },
+      "address": {
+        "label": "Address",
+        "placeholder": "Av. Santa Fe 1234"
+      },
+      "city": {
+        "label": "Neighborhood or city",
+        "placeholder": "Palermo, Buenos Aires"
+      },
+      "equipmentType": {
+        "label": "Equipment type",
+        "placeholder": "Split air conditioner"
+      },
+      "problemDescription": {
+        "label": "Problem description",
+        "placeholder": "The unit is not cooling and makes noise when it starts."
+      },
+      "brandModel": {
+        "label": "Brand or model",
+        "placeholder": "Samsung AR12"
+      },
+      "clientNotes": {
+        "label": "Additional comments",
+        "placeholder": "Contact preferences, access notes, or other helpful details."
+      }
+    },
+    "reviewNotice": "This screen does not create the request yet. Service selection, time selection, and submission for approval will be added next.",
+    "cta": "Continue",
+    "ctaNote": "Final confirmation stays pending until a supervisor reviews the request."
   }
 }

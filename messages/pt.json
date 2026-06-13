@@ -55,5 +55,54 @@
       "description": "Primeiro, uma experiência pública clara. Depois, os fluxos de reserva, aprovação e agenda interna se conectam a esta base.",
       "cta": "Solicitar visita"
     }
+  },
+  "Book": {
+    "brand": "Service Scheduler",
+    "eyebrow": "Solicitação de horário",
+    "title": "Conte o que precisa resolver.",
+    "description": "Informe seus dados e os detalhes do equipamento. Um supervisor revisará a solicitação antes de confirmar o horário.",
+    "required": "*",
+    "optional": "(opcional)",
+    "fields": {
+      "name": {
+        "label": "Nome",
+        "placeholder": "Maria Gomez"
+      },
+      "phone": {
+        "label": "Telefone",
+        "placeholder": "+54 11 1234-5678"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "maria@email.com"
+      },
+      "address": {
+        "label": "Endereço",
+        "placeholder": "Av. Santa Fe 1234"
+      },
+      "city": {
+        "label": "Bairro ou cidade",
+        "placeholder": "Palermo, Buenos Aires"
+      },
+      "equipmentType": {
+        "label": "Tipo de equipamento",
+        "placeholder": "Ar-condicionado split"
+      },
+      "problemDescription": {
+        "label": "Descrição do problema",
+        "placeholder": "O equipamento não está resfriando e faz ruído ao ligar."
+      },
+      "brandModel": {
+        "label": "Marca ou modelo",
+        "placeholder": "Samsung AR12"
+      },
+      "clientNotes": {
+        "label": "Comentários adicionais",
+        "placeholder": "Preferências de contato, instruções de acesso ou outros detalhes úteis."
+      }
+    },
+    "reviewNotice": "Esta tela ainda não cria a solicitação. A seleção de serviço, horário e envio para aprovação serão adicionados em seguida.",
+    "cta": "Continuar",
+    "ctaNote": "A confirmação final fica pendente até a revisão do supervisor."
   }
 }

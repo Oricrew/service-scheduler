@@ -55,5 +55,54 @@
       "description": "Primero una experiencia pública clara. Después, el flujo de reservas, aprobaciones y agenda interna se conecta sobre esta base.",
       "cta": "Pedir un turno"
     }
+  },
+  "Book": {
+    "brand": "Service Scheduler",
+    "eyebrow": "Solicitud de turno",
+    "title": "Contanos qué necesitás resolver.",
+    "description": "Completá tus datos y el detalle del equipo. El supervisor revisará la solicitud antes de confirmar el horario.",
+    "required": "*",
+    "optional": "(opcional)",
+    "fields": {
+      "name": {
+        "label": "Nombre",
+        "placeholder": "María Gómez"
+      },
+      "phone": {
+        "label": "Teléfono",
+        "placeholder": "+54 11 1234-5678"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "maria@email.com"
+      },
+      "address": {
+        "label": "Dirección",
+        "placeholder": "Av. Santa Fe 1234"
+      },
+      "city": {
+        "label": "Barrio o ciudad",
+        "placeholder": "Palermo, CABA"
+      },
+      "equipmentType": {
+        "label": "Tipo de equipo",
+        "placeholder": "Aire acondicionado split"
+      },
+      "problemDescription": {
+        "label": "Descripción del problema",
+        "placeholder": "El equipo no enfría y hace ruido al encender."
+      },
+      "brandModel": {
+        "label": "Marca o modelo",
+        "placeholder": "Samsung AR12"
+      },
+      "clientNotes": {
+        "label": "Comentarios adicionales",
+        "placeholder": "Preferencias de contacto, referencias de acceso o detalles útiles."
+      }
+    },
+    "reviewNotice": "Esta pantalla todavía no crea la solicitud. En el próximo paso se agregará selección de servicio, horario y envío para aprobación.",
+    "cta": "Continuar",
+    "ctaNote": "La confirmación final queda pendiente de revisión del supervisor."
   }
 }
