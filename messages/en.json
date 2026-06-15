@@ -56,6 +56,17 @@
       "cta": "Request a visit"
     }
   },
+  "DashboardShell": {
+    "brand": "Service Scheduler",
+    "subtitle": "Internal dashboard",
+    "nav": {
+      "home": "Dashboard",
+      "agenda": "Agenda",
+      "requests": "Requests",
+      "settings": "Settings"
+    },
+    "signOut": "Sign out"
+  },
   "Book": {
     "brand": "Service Scheduler",
     "eyebrow": "Appointment request",

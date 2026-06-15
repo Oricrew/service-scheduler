@@ -18,7 +18,7 @@ export default async function Home({
   const currentLocale = locale as Locale;
   const t = await getTranslations({ locale, namespace: "Home" });
   const bookHref = `/${currentLocale}/book`;
-  const loginHref = `/${currentLocale}/login`;
+  const dashboardHref = `/${currentLocale}/dashboard`;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -33,7 +33,7 @@ export default async function Home({
           <LanguageSwitcher currentLocale={currentLocale} />
           <Link
             className="hidden rounded-full px-4 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-200 hover:bg-white sm:inline-flex"
-            href={loginHref}
+            href={dashboardHref}
           >
             {t("nav.login")}
           </Link>
@@ -60,7 +60,7 @@ export default async function Home({
             </Link>
             <Link
               className="rounded-full bg-white px-6 py-3 text-center text-sm font-black text-slate-800 shadow-sm ring-1 ring-slate-200 hover:bg-slate-100"
-              href={loginHref}
+              href={dashboardHref}
             >
               {t("cta.login")}
             </Link>

@@ -56,6 +56,17 @@
       "cta": "Solicitar visita"
     }
   },
+  "DashboardShell": {
+    "brand": "Service Scheduler",
+    "subtitle": "Painel interno",
+    "nav": {
+      "home": "Painel",
+      "agenda": "Agenda",
+      "requests": "Solicitações",
+      "settings": "Configurações"
+    },
+    "signOut": "Sair"
+  },
   "Book": {
     "brand": "Service Scheduler",
     "eyebrow": "Solicitação de horário",

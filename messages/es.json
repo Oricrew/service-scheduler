@@ -56,6 +56,17 @@
       "cta": "Pedir un turno"
     }
   },
+  "DashboardShell": {
+    "brand": "Service Scheduler",
+    "subtitle": "Panel interno",
+    "nav": {
+      "home": "Panel",
+      "agenda": "Agenda",
+      "requests": "Solicitudes",
+      "settings": "Configuración"
+    },
+    "signOut": "Cerrar sesión"
+  },
   "Book": {
     "brand": "Service Scheduler",
     "eyebrow": "Solicitud de turno",
