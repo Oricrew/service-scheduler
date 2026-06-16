@@ -3,11 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getPendingRequestsPageData } from "@/lib/requests/queries";
 
-function formatRequestedAt(
-  value: string,
-  locale: string,
-  timezone: string,
-) {
+function formatRequestedAt(value: string, locale: string, timezone: string) {
   return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
@@ -82,9 +78,7 @@ export default async function RequestsPage({
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-bold text-slate-500">
-                    {t("equipment")}
-                  </dt>
+                  <dt className="font-bold text-slate-500">{t("equipment")}</dt>
                   <dd className="mt-1 font-semibold text-slate-900">
                     {request.equipment_type}
                   </dd>
