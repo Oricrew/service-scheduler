@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireAuthOrRedirect } from "@/lib/auth";
 
 import { signOut } from "../login/actions";
 
@@ -24,14 +23,7 @@ export default async function DashboardLayout({
   const { locale } = await params;
   const signOutWithLocale = signOut.bind(null, locale);
   const t = await getTranslations({ locale, namespace: "DashboardShell" });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect(`/${locale}/login`);
-  }
+  await requireAuthOrRedirect(locale);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
