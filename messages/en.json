@@ -108,6 +108,29 @@
       "reschedule_requested": "Reschedule requested"
     }
   },
+  "AppointmentDetail": {
+    "eyebrow": "Dashboard",
+    "emergency": "Emergency",
+    "requestedAt": "Requested date and time",
+    "submittedAt": "Submitted at",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "equipment": "Equipment",
+    "technicians": "Technicians",
+    "unassigned": "Unassigned",
+    "problem": "Problem",
+    "notes": "Client notes",
+    "backToRequests": "Back to requests",
+    "statuses": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "reschedule_requested": "Reschedule requested",
+      "cancel_requested": "Cancellation requested",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
+  },
   "Book": {
     "brand": "Service Scheduler",
     "eyebrow": "Appointment request",

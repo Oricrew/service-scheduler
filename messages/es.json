@@ -108,6 +108,29 @@
       "reschedule_requested": "Reprogramación solicitada"
     }
   },
+  "AppointmentDetail": {
+    "eyebrow": "Panel",
+    "emergency": "Emergencia",
+    "requestedAt": "Fecha y hora solicitada",
+    "submittedAt": "Solicitud enviada",
+    "phone": "Teléfono",
+    "email": "Correo",
+    "address": "Dirección",
+    "equipment": "Equipo",
+    "technicians": "Técnicos",
+    "unassigned": "Sin asignar",
+    "problem": "Problema",
+    "notes": "Notas del cliente",
+    "backToRequests": "Volver a solicitudes",
+    "statuses": {
+      "pending": "Pendiente",
+      "confirmed": "Confirmado",
+      "reschedule_requested": "Reprogramación solicitada",
+      "cancel_requested": "Cancelación solicitada",
+      "cancelled": "Cancelado",
+      "completed": "Completado"
+    }
+  },
   "Book": {
     "brand": "Service Scheduler",
     "eyebrow": "Solicitud de turno",
