@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { isConfirmSuccess } from "@/lib/appointments/constants";
 import { getAppointmentDetailPageData } from "@/lib/appointments/queries";
 import { pendingRequestStatuses } from "@/lib/requests/types";
 
@@ -47,7 +48,7 @@ export default async function DashboardAppointmentPage({
 
   return (
     <section className="grid gap-6">
-      {confirmed === "1" ? (
+      {isConfirmSuccess(confirmed) ? (
         <p className="rounded-[1.75rem] bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
           {t("confirmedSuccess")}
         </p>

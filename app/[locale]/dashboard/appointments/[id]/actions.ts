@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getAgendaOrganization } from "@/lib/agenda/queries";
+import {
+  confirmSuccessParam,
+  confirmSuccessValue,
+} from "@/lib/appointments/constants";
 import { requireRole } from "@/lib/auth";
 import { pendingRequestStatuses } from "@/lib/requests/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -94,5 +98,7 @@ export async function confirmAppointment(
   revalidatePath(`/${locale}/dashboard/appointments/${appointmentId}`);
   revalidatePath(`/${locale}/dashboard/requests`);
   revalidatePath(`/${locale}/dashboard/agenda`);
-  redirect(`/${locale}/dashboard/appointments/${appointmentId}?confirmed=1`);
+  redirect(
+    `/${locale}/dashboard/appointments/${appointmentId}?${confirmSuccessParam}=${confirmSuccessValue}`,
+  );
 }
