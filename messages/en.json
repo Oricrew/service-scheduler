@@ -130,6 +130,7 @@
     "assignRequiresSupervisor": "Only supervisors and admins can assign technicians.",
     "assignedSuccess": "Technicians assigned.",
     "noTechniciansAvailable": "No active technicians are available.",
+    "allTechniciansAssigned": "All technicians are assigned to this appointment.",
     "statuses": {
       "pending": "Pending",
       "confirmed": "Confirmed",

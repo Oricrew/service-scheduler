@@ -130,6 +130,7 @@
     "assignRequiresSupervisor": "Somente supervisores e administradores podem atribuir técnicos.",
     "assignedSuccess": "Técnicos atribuídos.",
     "noTechniciansAvailable": "Não há técnicos ativos disponíveis.",
+    "allTechniciansAssigned": "Todos os técnicos estão atribuídos a este horário.",
     "statuses": {
       "pending": "Pendente",
       "confirmed": "Confirmado",
