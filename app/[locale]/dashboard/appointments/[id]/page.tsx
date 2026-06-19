@@ -3,11 +3,18 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { getUserRole, hasMinimumRole } from "@/lib/auth";
-import { isConfirmSuccess } from "@/lib/appointments/constants";
+import { canAssignStatus, canConfirmStatus } from "@/lib/appointments/status";
+import {
+  isAssignSuccess,
+  isConfirmSuccess,
+} from "@/lib/appointments/success-query";
 import { getAppointmentDetailPageData } from "@/lib/appointments/queries";
-import { pendingRequestStatuses } from "@/lib/requests/types";
 
-import { confirmAppointment } from "./actions";
+import {
+  assignTechnicians,
+  confirmAppointment,
+  removeTechnician,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -19,41 +26,52 @@ function formatDateTime(value: string, locale: string, timezone: string) {
   }).format(new Date(value));
 }
 
-function canConfirmStatus(status: string) {
-  return (pendingRequestStatuses as readonly string[]).includes(status);
-}
-
 export default async function DashboardAppointmentPage({
   params,
   searchParams,
 }: Readonly<{
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ confirmed?: string }>;
+  searchParams: Promise<{ confirmed?: string; assigned?: string }>;
 }>) {
   const { locale, id } = await params;
-  const { confirmed } = await searchParams;
+  const { confirmed, assigned } = await searchParams;
   const pageData = await getAppointmentDetailPageData(id);
 
   if (!pageData) {
     notFound();
   }
 
-  const { organization, appointment } = pageData;
+  const { organization, appointment, activeTechnicians } = pageData;
   const userRole = await getUserRole();
-  const canConfirmAppointment = hasMinimumRole(userRole, "supervisor");
+  const canManageAppointment = hasMinimumRole(userRole, "supervisor");
   const t = await getTranslations({ locale, namespace: "AppointmentDetail" });
   const confirmWithLocale = confirmAppointment.bind(null, locale, id);
+  const assignWithLocale = assignTechnicians.bind(null, locale, id);
   const appointmentTime =
     appointment.confirmed_start_at ?? appointment.requested_start_at;
-  const technicians = appointment.appointment_technicians
-    .map((assignment) => assignment.technicians.name)
-    .join(", ");
+  const assignedTechnicianIds = new Set(
+    appointment.appointment_technicians.map(
+      (assignment) => assignment.technician_id,
+    ),
+  );
+  const canEditAssignments =
+    canManageAppointment && canAssignStatus(appointment.status);
+  const availableTechnicians = activeTechnicians.filter(
+    (technician) => !assignedTechnicianIds.has(technician.id),
+  );
+  const allTechniciansAssigned =
+    activeTechnicians.length > 0 && availableTechnicians.length === 0;
 
   return (
     <section className="grid gap-6">
       {isConfirmSuccess(confirmed) ? (
         <p className="rounded-[1.75rem] bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
           {t("confirmedSuccess")}
+        </p>
+      ) : null}
+      {isAssignSuccess(assigned) ? (
+        <p className="rounded-[1.75rem] bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
+          {t("assignedSuccess")}
         </p>
       ) : null}
 
@@ -126,18 +144,54 @@ export default async function DashboardAppointmentPage({
               {appointment.brand_model ? ` · ${appointment.brand_model}` : ""}
             </dd>
           </div>
-          <div>
-            <dt className="font-bold text-slate-500">{t("technicians")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
-              {technicians || t("unassigned")}
-            </dd>
-          </div>
           <div className="sm:col-span-2">
             <dt className="font-bold text-slate-500">{t("problem")}</dt>
             <dd className="mt-1 leading-6 text-slate-700">
               {appointment.problem_description}
             </dd>
           </div>
+          {canAssignStatus(appointment.status) ? (
+            <div className="sm:col-span-2">
+              <dt className="font-bold text-slate-500">{t("technicians")}</dt>
+              <dd className="mt-2 flex flex-wrap gap-2">
+                {appointment.appointment_technicians.length > 0 ? (
+                  appointment.appointment_technicians.map((assignment) => (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-900 ring-1 ring-sky-100"
+                      key={assignment.technician_id}
+                    >
+                      {assignment.technicians.name}
+                      {canEditAssignments ? (
+                        <form
+                          action={removeTechnician.bind(
+                            null,
+                            locale,
+                            id,
+                            assignment.technician_id,
+                          )}
+                          className="inline-flex"
+                        >
+                          <button
+                            aria-label={t("removeTechnician", {
+                              name: assignment.technicians.name,
+                            })}
+                            className="rounded-full px-1 text-sky-600 hover:bg-sky-100 hover:text-sky-900"
+                            type="submit"
+                          >
+                            ×
+                          </button>
+                        </form>
+                      ) : null}
+                    </span>
+                  ))
+                ) : (
+                  <span className="font-semibold text-slate-950">
+                    {t("unassigned")}
+                  </span>
+                )}
+              </dd>
+            </div>
+          ) : null}
           {appointment.client_notes ? (
             <div className="sm:col-span-2">
               <dt className="font-bold text-slate-500">{t("notes")}</dt>
@@ -148,19 +202,100 @@ export default async function DashboardAppointmentPage({
           ) : null}
         </dl>
 
-        <div className="mt-8 flex flex-col gap-3">
+        {canAssignStatus(appointment.status) ? (
+          <div className="mt-8 border-t border-slate-200 pt-8">
+            <h2 className="text-lg font-black text-slate-950">
+              {t("assignTechnicians")}
+            </h2>
+            {activeTechnicians.length > 0 ? (
+              allTechniciansAssigned ? (
+                <p className="mt-3 text-sm font-semibold text-slate-500">
+                  {t("allTechniciansAssigned")}
+                </p>
+              ) : (
+                <form action={assignWithLocale} className="mt-4 grid gap-3">
+                  {appointment.appointment_technicians.map((assignment) => (
+                    <input
+                      key={assignment.technician_id}
+                      name="technicianIds"
+                      type="hidden"
+                      value={assignment.technician_id}
+                    />
+                  ))}
+                  {availableTechnicians.map((technician) => (
+                    <label
+                      className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900"
+                      key={technician.id}
+                    >
+                      <input
+                        className="size-4 rounded border-slate-300"
+                        disabled={!canManageAppointment}
+                        name="technicianIds"
+                        type="checkbox"
+                        value={technician.id}
+                      />
+                      {technician.name}
+                    </label>
+                  ))}
+                  <div className="flex flex-col gap-2">
+                    <button
+                      className="w-fit rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
+                      disabled={!canManageAppointment}
+                      type="submit"
+                    >
+                      {t("saveAssignments")}
+                    </button>
+                    {!canManageAppointment ? (
+                      <p className="text-sm font-semibold text-slate-500">
+                        {t("assignRequiresSupervisor")}
+                      </p>
+                    ) : null}
+                  </div>
+                </form>
+              )
+            ) : (
+              <p className="mt-3 text-sm font-semibold text-slate-500">
+                {t("noTechniciansAvailable")}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="mt-8 border-t border-slate-200 pt-8">
+            <p className="text-sm font-bold text-slate-500">
+              {t("technicians")}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {appointment.appointment_technicians.length > 0 ? (
+                appointment.appointment_technicians.map((assignment) => (
+                  <span
+                    className="inline-flex items-center rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-900 ring-1 ring-sky-100"
+                    key={assignment.technician_id}
+                  >
+                    {assignment.technicians.name}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm font-semibold text-slate-950">
+                  {t("unassigned")}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-8">
           {canConfirmStatus(appointment.status) ? (
             <div className="flex flex-col gap-2">
               <form action={confirmWithLocale}>
                 <button
                   className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
-                  disabled={!canConfirmAppointment}
+                  disabled={!canManageAppointment}
                   type="submit"
                 >
                   {t("confirm")}
                 </button>
               </form>
-              {!canConfirmAppointment ? (
+              {!canManageAppointment ? (
                 <p className="text-sm font-semibold text-slate-500">
                   {t("confirmRequiresSupervisor")}
                 </p>
@@ -168,7 +303,7 @@ export default async function DashboardAppointmentPage({
             </div>
           ) : null}
           <Link
-            className="inline-flex rounded-full border border-slate-200 px-5 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
+            className="inline-flex w-fit rounded-full border border-slate-200 px-5 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
             href={`/${locale}/dashboard/requests`}
           >
             {t("backToRequests")}

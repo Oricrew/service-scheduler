@@ -1,5 +1,6 @@
 import { getAgendaOrganization } from "@/lib/agenda/queries";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getActiveTechnicians } from "@/lib/technicians/queries";
 
 import type { AppointmentDetail } from "./types";
 
@@ -9,6 +10,7 @@ export type AppointmentDetailPageData = {
     timezone: string;
   };
   appointment: AppointmentDetail;
+  activeTechnicians: Awaited<ReturnType<typeof getActiveTechnicians>>;
 };
 
 export async function getAppointmentDetailPageData(
@@ -35,6 +37,7 @@ export async function getAppointmentDetailPageData(
         clients (name, email, phone),
         services (name, is_emergency),
         appointment_technicians (
+          technician_id,
           technicians (name)
         )
       `,
@@ -47,8 +50,11 @@ export async function getAppointmentDetailPageData(
     return null;
   }
 
+  const activeTechnicians = await getActiveTechnicians(organization.id);
+
   return {
     organization,
     appointment: data as unknown as AppointmentDetail,
+    activeTechnicians,
   };
 }

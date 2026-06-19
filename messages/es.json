@@ -125,6 +125,13 @@
     "confirm": "Confirmar turno",
     "confirmRequiresSupervisor": "Solo supervisores y administradores pueden confirmar turnos.",
     "confirmedSuccess": "Turno confirmado.",
+    "assignTechnicians": "Asignar técnicos",
+    "saveAssignments": "Guardar asignación",
+    "assignRequiresSupervisor": "Solo supervisores y administradores pueden asignar técnicos.",
+    "assignedSuccess": "Técnicos asignados.",
+    "noTechniciansAvailable": "No hay técnicos activos disponibles.",
+    "allTechniciansAssigned": "Todos los técnicos están asignados a este turno.",
+    "removeTechnician": "Quitar {name}",
     "statuses": {
       "pending": "Pendiente",
       "confirmed": "Confirmado",

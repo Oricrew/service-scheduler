@@ -1,3 +1,11 @@
+export const assignableStatuses = [
+  "pending",
+  "reschedule_requested",
+  "confirmed",
+] as const;
+
+export type AssignableStatus = (typeof assignableStatuses)[number];
+
 export type AppointmentDetail = {
   id: string;
   status: string;
@@ -20,6 +28,7 @@ export type AppointmentDetail = {
     is_emergency: boolean;
   };
   appointment_technicians: {
+    technician_id: string;
     technicians: {
       name: string;
     };
