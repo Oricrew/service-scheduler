@@ -10,7 +10,11 @@ import {
 } from "@/lib/appointments/success-query";
 import { getAppointmentDetailPageData } from "@/lib/appointments/queries";
 
-import { assignTechnicians, confirmAppointment } from "./actions";
+import {
+  assignTechnicians,
+  confirmAppointment,
+  removeTechnician,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -50,10 +54,8 @@ export default async function DashboardAppointmentPage({
       (assignment) => assignment.technician_id,
     ),
   );
-  const assignedTechnicianLabel =
-    appointment.appointment_technicians
-      .map((assignment) => assignment.technicians.name)
-      .join(", ") || t("unassigned");
+  const canEditAssignments =
+    canManageAppointment && canAssignStatus(appointment.status);
   const availableTechnicians = activeTechnicians.filter(
     (technician) => !assignedTechnicianIds.has(technician.id),
   );
@@ -151,8 +153,42 @@ export default async function DashboardAppointmentPage({
           {canAssignStatus(appointment.status) ? (
             <div className="sm:col-span-2">
               <dt className="font-bold text-slate-500">{t("technicians")}</dt>
-              <dd className="mt-1 font-semibold text-slate-950">
-                {assignedTechnicianLabel}
+              <dd className="mt-2 flex flex-wrap gap-2">
+                {appointment.appointment_technicians.length > 0 ? (
+                  appointment.appointment_technicians.map((assignment) => (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-900 ring-1 ring-sky-100"
+                      key={assignment.technician_id}
+                    >
+                      {assignment.technicians.name}
+                      {canEditAssignments ? (
+                        <form
+                          action={removeTechnician.bind(
+                            null,
+                            locale,
+                            id,
+                            assignment.technician_id,
+                          )}
+                          className="inline-flex"
+                        >
+                          <button
+                            aria-label={t("removeTechnician", {
+                              name: assignment.technicians.name,
+                            })}
+                            className="rounded-full px-1 text-sky-600 hover:bg-sky-100 hover:text-sky-900"
+                            type="submit"
+                          >
+                            ×
+                          </button>
+                        </form>
+                      ) : null}
+                    </span>
+                  ))
+                ) : (
+                  <span className="font-semibold text-slate-950">
+                    {t("unassigned")}
+                  </span>
+                )}
               </dd>
             </div>
           ) : null}
@@ -228,9 +264,22 @@ export default async function DashboardAppointmentPage({
             <p className="text-sm font-bold text-slate-500">
               {t("technicians")}
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-950">
-              {assignedTechnicianLabel}
-            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {appointment.appointment_technicians.length > 0 ? (
+                appointment.appointment_technicians.map((assignment) => (
+                  <span
+                    className="inline-flex items-center rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-900 ring-1 ring-sky-100"
+                    key={assignment.technician_id}
+                  >
+                    {assignment.technicians.name}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm font-semibold text-slate-950">
+                  {t("unassigned")}
+                </span>
+              )}
+            </div>
           </div>
         )}
 

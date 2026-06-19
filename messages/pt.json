@@ -131,6 +131,7 @@
     "assignedSuccess": "Técnicos atribuídos.",
     "noTechniciansAvailable": "Não há técnicos ativos disponíveis.",
     "allTechniciansAssigned": "Todos os técnicos estão atribuídos a este horário.",
+    "removeTechnician": "Remover {name}",
     "statuses": {
       "pending": "Pendente",
       "confirmed": "Confirmado",

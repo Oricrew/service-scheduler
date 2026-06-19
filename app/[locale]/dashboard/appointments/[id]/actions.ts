@@ -186,3 +186,66 @@ export async function assignTechnicians(
     `/${locale}/dashboard/appointments/${appointmentId}?${assignSuccessParam}=${assignSuccessValue}`,
   );
 }
+
+export async function removeTechnician(
+  locale: string,
+  appointmentId: string,
+  technicianId: string,
+) {
+  const user = await requireRole("supervisor");
+  const organization = await getAgendaOrganization();
+  const supabase = createSupabaseAdminClient();
+
+  const { data: appointment, error } = await supabase
+    .from("appointments")
+    .select("id, status")
+    .eq("id", appointmentId)
+    .eq("organization_id", organization.id)
+    .maybeSingle();
+
+  if (error || !appointment) {
+    throw new Error("Appointment not found.");
+  }
+
+  if (!canAssignStatus(appointment.status)) {
+    throw new Error("Technicians cannot be removed from this appointment.");
+  }
+
+  const { data: technician, error: technicianError } = await supabase
+    .from("technicians")
+    .select("id")
+    .eq("id", technicianId)
+    .eq("organization_id", organization.id)
+    .maybeSingle();
+
+  if (technicianError || !technician) {
+    throw new Error("Invalid technician.");
+  }
+
+  const { error: deleteError } = await supabase
+    .from("appointment_technicians")
+    .delete()
+    .eq("appointment_id", appointmentId)
+    .eq("technician_id", technicianId);
+
+  if (deleteError) {
+    throw new Error("Could not remove technician assignment.");
+  }
+
+  const { error: eventError } = await supabase
+    .from("appointment_events")
+    .insert({
+      appointment_id: appointmentId,
+      actor_user_id: user.id,
+      event_type: "technician_removed",
+      metadata: { technician_id: technicianId },
+    });
+
+  if (eventError) {
+    throw new Error("Could not log appointment event.");
+  }
+
+  revalidatePath(`/${locale}/dashboard/appointments/${appointmentId}`);
+  revalidatePath(`/${locale}/dashboard/agenda`);
+  redirect(`/${locale}/dashboard/appointments/${appointmentId}`);
+}
