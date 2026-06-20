@@ -151,7 +151,9 @@ export default async function DashboardAppointmentPage({
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">{t("estimatedDuration")}</dt>
+            <dt className="font-bold text-slate-500">
+              {t("estimatedDuration")}
+            </dt>
             <dd className="mt-2">
               {canEditDuration ? (
                 <div className="flex flex-wrap gap-2">
