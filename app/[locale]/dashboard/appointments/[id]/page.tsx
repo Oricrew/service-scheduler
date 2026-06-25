@@ -20,6 +20,7 @@ import {
   removeTechnician,
   updateEstimatedDuration,
 } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 export const dynamic = "force-dynamic";
 
@@ -189,17 +190,17 @@ export default async function DashboardAppointmentPage({
                       className="inline-flex"
                       key={minutes}
                     >
-                      <button
+                      <SubmitButton
                         aria-pressed={effectiveDurationMinutes === minutes}
                         className={
                           effectiveDurationMinutes === minutes
-                            ? "rounded-full bg-sky-50 px-4 py-2 text-sm font-bold text-sky-900 ring-2 ring-sky-300"
-                            : "rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
+                            ? "rounded-full bg-sky-50 px-4 py-2 text-sm font-bold text-sky-900 ring-2 ring-sky-300 disabled:cursor-not-allowed disabled:opacity-70"
+                            : "rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
                         }
-                        type="submit"
+                        pendingChildren={t("durationPreset", { minutes })}
                       >
                         {t("durationPreset", { minutes })}
-                      </button>
+                      </SubmitButton>
                     </form>
                   ))}
                 </div>
@@ -237,15 +238,15 @@ export default async function DashboardAppointmentPage({
                           )}
                           className="inline-flex"
                         >
-                          <button
+                          <SubmitButton
                             aria-label={t("removeTechnician", {
                               name: assignment.technicians.name,
                             })}
-                            className="rounded-full px-1 text-sky-600 hover:bg-sky-100 hover:text-sky-900"
-                            type="submit"
+                            className="rounded-full px-1 text-sky-600 hover:bg-sky-100 hover:text-sky-900 disabled:cursor-not-allowed disabled:opacity-60"
+                            pendingChildren="×"
                           >
                             ×
-                          </button>
+                          </SubmitButton>
                         </form>
                       ) : null}
                     </span>
@@ -319,13 +320,13 @@ export default async function DashboardAppointmentPage({
                     );
                   })}
                   <div className="flex flex-col gap-2">
-                    <button
+                    <SubmitButton
                       className="w-fit rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
                       disabled={!canManageAppointment}
-                      type="submit"
+                      pendingChildren={`${t("saveAssignments")}...`}
                     >
                       {t("saveAssignments")}
-                    </button>
+                    </SubmitButton>
                     {!canManageAppointment ? (
                       <p className="text-sm font-semibold text-slate-500">
                         {t("assignRequiresSupervisor")}
@@ -368,13 +369,13 @@ export default async function DashboardAppointmentPage({
           {canConfirmStatus(appointment.status) ? (
             <div className="flex flex-col gap-2">
               <form action={confirmWithLocale}>
-                <button
+                <SubmitButton
                   className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
                   disabled={!canManageAppointment}
-                  type="submit"
+                  pendingChildren={`${t("confirm")}...`}
                 >
                   {t("confirm")}
-                </button>
+                </SubmitButton>
               </form>
               {!canManageAppointment ? (
                 <p className="text-sm font-semibold text-slate-500">
