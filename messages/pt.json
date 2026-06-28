@@ -249,5 +249,16 @@
     "address": "Endereço",
     "linkIntro": "Ver seu horário",
     "footer": "Entraremos em contato após revisar a solicitação."
+  },
+  "AppointmentConfirmationEmail": {
+    "subject": "Seu horário foi confirmado",
+    "greeting": "Olá {name},",
+    "intro": "Seu horário foi confirmado.",
+    "service": "Serviço",
+    "dateTime": "Data e horário confirmados",
+    "address": "Endereço",
+    "technicians": "Técnicos",
+    "unassigned": "Sem atribuição",
+    "footer": "Se você salvou o link do horário no primeiro e-mail, pode usá-lo para ver os detalhes atualizados."
   }
 }

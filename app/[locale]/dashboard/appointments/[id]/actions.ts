@@ -14,14 +14,27 @@ import {
   schedulingConflictValue,
 } from "@/lib/appointments/constants";
 import { canAssignStatus, canConfirmStatus } from "@/lib/appointments/status";
+import { sendAppointmentConfirmationEmail } from "@/lib/email/send-appointment-confirmation-email";
 import { requireRole } from "@/lib/auth";
 import { getAppointmentSchedulingWindow } from "@/lib/scheduling/appointment-window";
 import { getBlockedWindowEnd } from "@/lib/scheduling/blocked-window";
 import { findTechnicianSchedulingConflicts } from "@/lib/scheduling/conflicts";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
+type MaybeArray<T> = T | T[] | null;
+type AppointmentClient = { name: string; email: string };
+type AppointmentService = { name: string };
+type AppointmentTechnicianAssignment = {
+  technician_id: string;
+  technicians: MaybeArray<{ name: string }>;
+};
+
 function readTechnicianIds(formData: FormData) {
   return formData.getAll("technicianIds").map(String).filter(Boolean);
+}
+
+function asArray<T>(value: MaybeArray<T>) {
+  return Array.isArray(value) ? value : value ? [value] : [];
 }
 
 function redirectOnSchedulingConflict(locale: string, appointmentId: string) {
@@ -53,6 +66,14 @@ async function assertNoSchedulingConflicts(input: {
   }
 }
 
+function getTechnicianNames(
+  assignmentRows: MaybeArray<AppointmentTechnicianAssignment>,
+) {
+  return asArray(assignmentRows).flatMap((assignment) =>
+    asArray(assignment.technicians).map((technician) => technician.name),
+  );
+}
+
 export async function confirmAppointment(
   locale: string,
   appointmentId: string,
@@ -71,8 +92,14 @@ export async function confirmAppointment(
         confirmed_start_at,
         estimated_duration_minutes,
         travel_buffer_minutes,
-        services (default_duration_minutes),
-        appointment_technicians (technician_id)
+        address,
+        city,
+        clients (name, email),
+        services (name, default_duration_minutes),
+        appointment_technicians (
+          technician_id,
+          technicians (name)
+        )
       `,
     )
     .eq("id", appointmentId)
@@ -89,17 +116,11 @@ export async function confirmAppointment(
 
   const { startAt, durationMinutes, travelBufferMinutes } =
     getAppointmentSchedulingWindow(appointment);
-  const assignmentRows = appointment.appointment_technicians as
-    | { technician_id: string }[]
-    | { technician_id: string }
-    | null;
-  const technicianIds = (
-    Array.isArray(assignmentRows)
-      ? assignmentRows
-      : assignmentRows
-        ? [assignmentRows]
-        : []
-  ).map((assignment) => assignment.technician_id);
+  const assignmentRows =
+    appointment.appointment_technicians as unknown as MaybeArray<AppointmentTechnicianAssignment>;
+  const technicianIds = asArray(assignmentRows).map(
+    (assignment) => assignment.technician_id,
+  );
 
   if (technicianIds.length > 0) {
     await assertNoSchedulingConflicts({
@@ -147,6 +168,21 @@ export async function confirmAppointment(
   if (eventError) {
     throw new Error("Could not log appointment event.");
   }
+
+  const client = appointment.clients as unknown as AppointmentClient;
+  const service = appointment.services as unknown as AppointmentService;
+
+  await sendAppointmentConfirmationEmail({
+    locale,
+    to: client.email,
+    clientName: client.name,
+    serviceName: service.name,
+    confirmedStartAt,
+    timezone: organization.timezone,
+    address: appointment.address as string,
+    city: appointment.city as string,
+    technicianNames: getTechnicianNames(assignmentRows),
+  });
 
   revalidatePath(`/${locale}/dashboard/appointments/${appointmentId}`);
   revalidatePath(`/${locale}/dashboard/requests`);

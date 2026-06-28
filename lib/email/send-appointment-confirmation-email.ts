@@ -1,38 +1,37 @@
 import { getTranslations } from "next-intl/server";
 
-import {
-  buildAppointmentUrl,
-  escapeHtml,
-  formatEmailDateTime,
-  sendEmail,
-} from "@/lib/email/shared";
+import { escapeHtml, formatEmailDateTime, sendEmail } from "@/lib/email/shared";
 
-export type AppointmentRequestEmailInput = {
+export type AppointmentConfirmationEmailInput = {
   locale: string;
   to: string;
   clientName: string;
   serviceName: string;
-  requestedStartAt: string;
+  confirmedStartAt: string;
   timezone: string;
   address: string;
   city: string;
-  appointmentUrl: string;
+  technicianNames: string[];
 };
 
-export async function sendAppointmentRequestEmail(
-  input: AppointmentRequestEmailInput,
+export async function sendAppointmentConfirmationEmail(
+  input: AppointmentConfirmationEmailInput,
 ) {
   try {
     const t = await getTranslations({
       locale: input.locale,
-      namespace: "AppointmentRequestEmail",
+      namespace: "AppointmentConfirmationEmail",
     });
     const formattedDateTime = formatEmailDateTime(
-      input.requestedStartAt,
+      input.confirmedStartAt,
       input.locale,
       input.timezone,
     );
     const fullAddress = `${input.address}, ${input.city}`;
+    const technicians =
+      input.technicianNames.length > 0
+        ? input.technicianNames.join(", ")
+        : t("unassigned");
     const greeting = t("greeting", { name: input.clientName });
     const subject = t("subject");
     const text = [
@@ -43,9 +42,7 @@ export async function sendAppointmentRequestEmail(
       `${t("service")}: ${input.serviceName}`,
       `${t("dateTime")}: ${formattedDateTime}`,
       `${t("address")}: ${fullAddress}`,
-      "",
-      t("linkIntro"),
-      input.appointmentUrl,
+      `${t("technicians")}: ${technicians}`,
       "",
       t("footer"),
     ].join("\n");
@@ -56,8 +53,8 @@ export async function sendAppointmentRequestEmail(
       `<li><strong>${escapeHtml(t("service"))}:</strong> ${escapeHtml(input.serviceName)}</li>`,
       `<li><strong>${escapeHtml(t("dateTime"))}:</strong> ${escapeHtml(formattedDateTime)}</li>`,
       `<li><strong>${escapeHtml(t("address"))}:</strong> ${escapeHtml(fullAddress)}</li>`,
+      `<li><strong>${escapeHtml(t("technicians"))}:</strong> ${escapeHtml(technicians)}</li>`,
       "</ul>",
-      `<p><a href="${escapeHtml(input.appointmentUrl)}">${escapeHtml(t("linkIntro"))}</a></p>`,
       `<p>${escapeHtml(t("footer"))}</p>`,
     ].join("");
 
@@ -67,12 +64,10 @@ export async function sendAppointmentRequestEmail(
       text,
       html,
       skippedMessage:
-        "Appointment request email skipped: missing RESEND_API_KEY, EMAIL_FROM, or NEXT_PUBLIC_APP_URL.",
-      errorMessage: "Failed to send appointment request email:",
+        "Appointment confirmation email skipped: missing RESEND_API_KEY, EMAIL_FROM, or NEXT_PUBLIC_APP_URL.",
+      errorMessage: "Failed to send appointment confirmation email:",
     });
   } catch (error) {
-    console.error("Failed to send appointment request email:", error);
+    console.error("Failed to send appointment confirmation email:", error);
   }
 }
-
-export { buildAppointmentUrl };

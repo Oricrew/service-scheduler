@@ -249,5 +249,16 @@
     "address": "Address",
     "linkIntro": "View your appointment",
     "footer": "We will contact you after reviewing your request."
+  },
+  "AppointmentConfirmationEmail": {
+    "subject": "Your appointment is confirmed",
+    "greeting": "Hi {name},",
+    "intro": "Your appointment has been confirmed.",
+    "service": "Service",
+    "dateTime": "Confirmed date and time",
+    "address": "Address",
+    "technicians": "Technicians",
+    "unassigned": "Unassigned",
+    "footer": "If you saved your appointment link from the first email, you can use it to view the updated details."
   }
 }

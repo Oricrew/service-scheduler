@@ -249,5 +249,16 @@
     "address": "Dirección",
     "linkIntro": "Ver tu turno",
     "footer": "Te contactaremos después de revisar la solicitud."
+  },
+  "AppointmentConfirmationEmail": {
+    "subject": "Tu turno fue confirmado",
+    "greeting": "Hola {name},",
+    "intro": "Tu turno fue confirmado.",
+    "service": "Servicio",
+    "dateTime": "Fecha y horario confirmados",
+    "address": "Dirección",
+    "technicians": "Técnicos",
+    "unassigned": "Sin asignar",
+    "footer": "Si guardaste el enlace de tu turno del primer correo, podés usarlo para ver los detalles actualizados."
   }
 }
