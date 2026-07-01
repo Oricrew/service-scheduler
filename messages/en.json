@@ -114,6 +114,8 @@
     "requestedAt": "Requested date and time",
     "submittedAt": "Submitted at",
     "phone": "Phone",
+    "whatsappClient": "WhatsApp",
+    "whatsappMessage": "Hi {clientName}, we are contacting you about your {serviceName} appointment with Service Scheduler.",
     "email": "Email",
     "address": "Address",
     "equipment": "Equipment",

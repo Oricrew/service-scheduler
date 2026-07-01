@@ -13,6 +13,7 @@ import {
 import { getAppointmentDetailPageData } from "@/lib/appointments/queries";
 import { getAppointmentSchedulingWindow } from "@/lib/scheduling/appointment-window";
 import { getBusyTechnicianIds } from "@/lib/scheduling/conflicts";
+import { buildWhatsappUrl } from "@/lib/whatsapp";
 
 import {
   assignTechnicians,
@@ -98,6 +99,13 @@ export default async function DashboardAppointmentPage({
     canEditAssignments &&
     activeTechnicians.length > 0 &&
     availableTechnicians.length === 0;
+  const whatsappUrl = buildWhatsappUrl({
+    phone: appointment.clients.phone,
+    message: t("whatsappMessage", {
+      clientName: appointment.clients.name,
+      serviceName: appointment.services.name,
+    }),
+  });
 
   return (
     <section className="grid gap-6">
@@ -163,8 +171,16 @@ export default async function DashboardAppointmentPage({
           </div>
           <div>
             <dt className="font-bold text-slate-500">{t("phone")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
-              {appointment.clients.phone}
+            <dd className="mt-1 flex flex-wrap items-center gap-2 font-semibold text-slate-950">
+              <span>{appointment.clients.phone}</span>
+              <a
+                className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-800 ring-1 ring-emerald-100 hover:bg-emerald-100"
+                href={whatsappUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {t("whatsappClient")}
+              </a>
             </dd>
           </div>
           <div>

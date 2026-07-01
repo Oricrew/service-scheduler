@@ -114,6 +114,8 @@
     "requestedAt": "Fecha y hora solicitada",
     "submittedAt": "Solicitud enviada",
     "phone": "Teléfono",
+    "whatsappClient": "WhatsApp",
+    "whatsappMessage": "Hola {clientName}, te contactamos por tu turno de {serviceName} en Service Scheduler.",
     "email": "Correo",
     "address": "Dirección",
     "equipment": "Equipo",
