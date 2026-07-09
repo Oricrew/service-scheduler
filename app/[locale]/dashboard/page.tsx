@@ -14,6 +14,13 @@ function formatRequestedAt(value: string, locale: string, timezone: string) {
   }).format(new Date(value));
 }
 
+function formatDashboardDate(date: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "full",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00.000Z`));
+}
+
 export default async function DashboardPage({
   params,
 }: Readonly<{
@@ -34,17 +41,19 @@ export default async function DashboardPage({
 
   return (
     <section className="grid gap-6">
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="text-sm font-black uppercase tracking-[0.22em] text-sky-700">
-          {t("eyebrow")}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-4xl font-black leading-none tracking-tight text-slate-950">
+            {t("title")}
+          </h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+            {t("description")}
+          </p>
+        </div>
+        <p className="w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm">
+          {formatDashboardDate(agendaData.today, locale)}
         </p>
-        <h1 className="mt-4 text-4xl font-black leading-none tracking-tight">
-          {t("title")}
-        </h1>
-        <p className="mt-4 text-lg leading-8 text-slate-600">
-          {t("description")}
-        </p>
-      </div>
+      </header>
 
       <div
         className={[
