@@ -67,6 +67,32 @@
     },
     "signOut": "Sign out"
   },
+  "DashboardHome": {
+    "eyebrow": "Dashboard",
+    "title": "Today at a glance",
+    "description": "Start from the work that needs attention now: pending requests and today's field visits.",
+    "viewAll": "View all",
+    "cards": {
+      "pending": {
+        "label": "Pending requests",
+        "description": "Requests waiting for supervisor review."
+      },
+      "today": {
+        "label": "Today's visits",
+        "description": "Appointments scheduled or requested for today."
+      }
+    },
+    "pendingPreview": {
+      "eyebrow": "Requests",
+      "title": "Next pending",
+      "empty": "No requests are waiting for review."
+    },
+    "todayPreview": {
+      "eyebrow": "Agenda",
+      "title": "Today",
+      "empty": "No appointments are scheduled for today."
+    }
+  },
   "DailyAgenda": {
     "eyebrow": "Dashboard",
     "titles": {

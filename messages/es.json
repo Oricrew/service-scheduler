@@ -67,6 +67,32 @@
     },
     "signOut": "Cerrar sesión"
   },
+  "DashboardHome": {
+    "eyebrow": "Panel",
+    "title": "Resumen del día",
+    "description": "Empezá por el trabajo que necesita atención ahora: solicitudes pendientes y visitas de hoy.",
+    "viewAll": "Ver todo",
+    "cards": {
+      "pending": {
+        "label": "Solicitudes pendientes",
+        "description": "Solicitudes que esperan revisión del supervisor."
+      },
+      "today": {
+        "label": "Visitas de hoy",
+        "description": "Turnos agendados o solicitados para hoy."
+      }
+    },
+    "pendingPreview": {
+      "eyebrow": "Solicitudes",
+      "title": "Próximas pendientes",
+      "empty": "No hay solicitudes pendientes de revisión."
+    },
+    "todayPreview": {
+      "eyebrow": "Agenda",
+      "title": "Hoy",
+      "empty": "No hay turnos agendados para hoy."
+    }
+  },
   "DailyAgenda": {
     "eyebrow": "Panel",
     "titles": {
