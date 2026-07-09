@@ -67,6 +67,32 @@
     },
     "signOut": "Sair"
   },
+  "DashboardHome": {
+    "eyebrow": "Painel",
+    "title": "Resumo do dia",
+    "description": "Comece pelo trabalho que precisa de atenção agora: solicitações pendentes e visitas de hoje.",
+    "viewAll": "Ver tudo",
+    "cards": {
+      "pending": {
+        "label": "Solicitações pendentes",
+        "description": "Solicitações aguardando revisão do supervisor."
+      },
+      "today": {
+        "label": "Visitas de hoje",
+        "description": "Horários agendados ou solicitados para hoje."
+      }
+    },
+    "pendingPreview": {
+      "eyebrow": "Solicitações",
+      "title": "Próximas pendentes",
+      "empty": "Não há solicitações aguardando revisão."
+    },
+    "todayPreview": {
+      "eyebrow": "Agenda",
+      "title": "Hoje",
+      "empty": "Não há horários agendados para hoje."
+    }
+  },
   "DailyAgenda": {
     "eyebrow": "Painel",
     "titles": {
