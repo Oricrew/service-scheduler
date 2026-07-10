@@ -67,6 +67,21 @@
     },
     "signOut": "Cerrar sesión"
   },
+  "Login": {
+    "brand": "Service Scheduler",
+    "eyebrow": "Acceso interno",
+    "title": "Iniciar sesión",
+    "description": "Ingresá con tu cuenta interna para acceder al panel.",
+    "fields": {
+      "email": "Email",
+      "password": "Contraseña"
+    },
+    "submit": "Entrar",
+    "errors": {
+      "invalid": "Email o contraseña inválidos.",
+      "missing": "Ingresá tu email y contraseña."
+    }
+  },
   "DashboardHome": {
     "eyebrow": "Panel",
     "title": "Resumen del día",

@@ -67,6 +67,21 @@
     },
     "signOut": "Sign out"
   },
+  "Login": {
+    "brand": "Service Scheduler",
+    "eyebrow": "Internal access",
+    "title": "Login",
+    "description": "Sign in with your internal account to access the dashboard.",
+    "fields": {
+      "email": "Email",
+      "password": "Password"
+    },
+    "submit": "Sign in",
+    "errors": {
+      "invalid": "Invalid email or password.",
+      "missing": "Enter your email and password."
+    }
+  },
   "DashboardHome": {
     "eyebrow": "Dashboard",
     "title": "Today at a glance",

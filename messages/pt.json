@@ -67,6 +67,21 @@
     },
     "signOut": "Sair"
   },
+  "Login": {
+    "brand": "Service Scheduler",
+    "eyebrow": "Acesso interno",
+    "title": "Entrar",
+    "description": "Entre com sua conta interna para acessar o painel.",
+    "fields": {
+      "email": "Email",
+      "password": "Senha"
+    },
+    "submit": "Entrar",
+    "errors": {
+      "invalid": "Email ou senha inválidos.",
+      "missing": "Informe seu email e senha."
+    }
+  },
   "DashboardHome": {
     "eyebrow": "Painel",
     "title": "Resumo do dia",
