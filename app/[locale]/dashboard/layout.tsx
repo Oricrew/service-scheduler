@@ -3,9 +3,13 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { routing } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { signOut } from "../login/actions";
+
+type Locale = (typeof routing.locales)[number];
 
 const navItems = [
   { key: "home", href: "/dashboard" },
@@ -22,7 +26,8 @@ export default async function DashboardLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
-  const signOutWithLocale = signOut.bind(null, locale);
+  const currentLocale = locale as Locale;
+  const signOutWithLocale = signOut.bind(null, currentLocale);
   const t = await getTranslations({ locale, namespace: "DashboardShell" });
   const supabase = await createSupabaseServerClient();
   const {
@@ -40,7 +45,7 @@ export default async function DashboardLayout({
           <div>
             <Link
               className="text-base font-black tracking-tight sm:text-lg"
-              href={`/${locale}/dashboard`}
+              href={`/${currentLocale}/dashboard`}
             >
               {t("brand")}
             </Link>
@@ -53,7 +58,7 @@ export default async function DashboardLayout({
             {navItems.map((item) => (
               <Link
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-900"
-                href={`/${locale}${item.href}`}
+                href={`/${currentLocale}${item.href}`}
                 key={item.href}
               >
                 {t(`nav.${item.key}`)}
@@ -61,14 +66,17 @@ export default async function DashboardLayout({
             ))}
           </nav>
 
-          <form action={signOutWithLocale}>
-            <button
-              className="rounded-full bg-slate-950 px-5 py-2 text-sm font-black text-white shadow-sm hover:bg-slate-800"
-              type="submit"
-            >
-              {t("signOut")}
-            </button>
-          </form>
+          <div className="flex flex-wrap items-center gap-2">
+            <LanguageSwitcher currentLocale={currentLocale} />
+            <form action={signOutWithLocale}>
+              <button
+                className="rounded-full bg-slate-950 px-5 py-2 text-sm font-black text-white shadow-sm hover:bg-slate-800"
+                type="submit"
+              >
+                {t("signOut")}
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
