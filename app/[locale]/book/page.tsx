@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
-import { TimeSlotPicker } from "@/components/booking/time-slot-picker";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
 
 import { createAppointmentRequest } from "./actions";
+import { BookingForm } from "./booking-form";
 
 type Locale = (typeof routing.locales)[number];
 
@@ -17,7 +17,7 @@ const serviceTypes = [
   "emergencyService",
 ] as const;
 
-const requiredFields = [
+const fields = [
   "name",
   "phone",
   "email",
@@ -25,14 +25,9 @@ const requiredFields = [
   "city",
   "equipmentType",
   "problemDescription",
+  "brandModel",
+  "clientNotes",
 ] as const;
-
-const optionalFields = ["brandModel", "clientNotes"] as const;
-
-const inputTypes: Partial<Record<(typeof requiredFields)[number], string>> = {
-  email: "email",
-  phone: "tel",
-};
 
 export default async function BookPage({
   params,
@@ -46,6 +41,54 @@ export default async function BookPage({
     null,
     currentLocale,
   );
+  const formCopy = {
+    required: t("required"),
+    optional: t("optional"),
+    cta: t("cta"),
+    ctaNote: t("ctaNote"),
+    reviewNotice: t("reviewNotice"),
+    serviceType: {
+      label: t("serviceType.label"),
+      description: t("serviceType.description"),
+      options: Object.fromEntries(
+        serviceTypes.map((serviceType) => [
+          serviceType,
+          {
+            value: t(`serviceType.options.${serviceType}.value`),
+            label: t(`serviceType.options.${serviceType}.label`),
+            description: t(`serviceType.options.${serviceType}.description`),
+          },
+        ]),
+      ) as Record<
+        (typeof serviceTypes)[number],
+        { value: string; label: string; description: string }
+      >,
+    },
+    timeSelection: {
+      label: t("timeSelection.label"),
+      description: t("timeSelection.description"),
+      dateLabel: t("timeSelection.dateLabel"),
+      slotLabel: t("timeSelection.slotLabel"),
+      requiredLabel: t("required"),
+      noSlotsLabel: t("timeSelection.noSlots"),
+      helperText: t("timeSelection.helperText"),
+    },
+    fields: Object.fromEntries(
+      fields.map((field) => [
+        field,
+        {
+          label: t(`fields.${field}.label`),
+          placeholder: t(`fields.${field}.placeholder`),
+        },
+      ]),
+    ) as Record<
+      (typeof fields)[number],
+      { label: string; placeholder: string }
+    >,
+    errors: {
+      invalidDateTime: t("errors.invalidDateTime"),
+    },
+  };
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -72,130 +115,10 @@ export default async function BookPage({
           </p>
         </div>
 
-        <form
+        <BookingForm
           action={createAppointmentRequestWithLocale}
-          className="mt-10 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8"
-        >
-          <fieldset className="mb-8">
-            <legend className="text-sm font-bold text-slate-800">
-              {t("serviceType.label")}
-              <span className="ml-1 text-sky-700">{t("required")}</span>
-            </legend>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              {t("serviceType.description")}
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {serviceTypes.map((serviceType) => (
-                <label
-                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4 transition hover:border-sky-300 hover:bg-sky-50/50"
-                  key={serviceType}
-                >
-                  <input
-                    className="mt-1 size-4 accent-sky-700"
-                    name="serviceType"
-                    required
-                    type="radio"
-                    value={t(`serviceType.options.${serviceType}.value`)}
-                  />
-                  <span>
-                    <span className="block text-sm font-black text-slate-900">
-                      {t(`serviceType.options.${serviceType}.label`)}
-                    </span>
-                    <span className="mt-1 block text-sm leading-6 text-slate-500">
-                      {t(`serviceType.options.${serviceType}.description`)}
-                    </span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <TimeSlotPicker
-            dateLabel={t("timeSelection.dateLabel")}
-            description={t("timeSelection.description")}
-            helperText={t("timeSelection.helperText")}
-            label={t("timeSelection.label")}
-            noSlotsLabel={t("timeSelection.noSlots")}
-            requiredLabel={t("required")}
-            slotLabel={t("timeSelection.slotLabel")}
-          />
-
-          <div className="grid gap-5 md:grid-cols-2">
-            {requiredFields.map((field) => (
-              <label
-                className={[
-                  "grid gap-2",
-                  field === "problemDescription" ? "md:col-span-2" : "",
-                ].join(" ")}
-                key={field}
-              >
-                <span className="text-sm font-bold text-slate-800">
-                  {t(`fields.${field}.label`)}
-                  <span className="ml-1 text-sky-700">{t("required")}</span>
-                </span>
-                {field === "problemDescription" ? (
-                  <textarea
-                    className="min-h-32 rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                    name={field}
-                    placeholder={t(`fields.${field}.placeholder`)}
-                    required
-                  />
-                ) : (
-                  <input
-                    className="rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                    name={field}
-                    placeholder={t(`fields.${field}.placeholder`)}
-                    required
-                    type={inputTypes[field] ?? "text"}
-                  />
-                )}
-              </label>
-            ))}
-
-            {optionalFields.map((field) => (
-              <label
-                className={[
-                  "grid gap-2",
-                  field === "clientNotes" ? "md:col-span-2" : "",
-                ].join(" ")}
-                key={field}
-              >
-                <span className="text-sm font-bold text-slate-800">
-                  {t(`fields.${field}.label`)}
-                  <span className="ml-1 text-slate-500">{t("optional")}</span>
-                </span>
-                {field === "clientNotes" ? (
-                  <textarea
-                    className="min-h-28 rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                    name={field}
-                    placeholder={t(`fields.${field}.placeholder`)}
-                  />
-                ) : (
-                  <input
-                    className="rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                    name={field}
-                    placeholder={t(`fields.${field}.placeholder`)}
-                    type="text"
-                  />
-                )}
-              </label>
-            ))}
-          </div>
-
-          <div className="mt-8 rounded-3xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-            {t("reviewNotice")}
-          </div>
-
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800"
-              type="submit"
-            >
-              {t("cta")}
-            </button>
-            <p className="text-sm leading-6 text-slate-500">{t("ctaNote")}</p>
-          </div>
-        </form>
+          copy={formCopy}
+        />
       </section>
     </main>
   );
