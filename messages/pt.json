@@ -274,6 +274,9 @@
       }
     },
     "reviewNotice": "Envie a solicitação quando os dados estiverem prontos. Um supervisor revisará antes de confirmar a visita.",
+    "errors": {
+      "invalidDateTime": "Escolha uma data e um horário válidos dentro do horário de atendimento."
+    },
     "cta": "Enviar solicitação",
     "ctaNote": "A confirmação final fica pendente até a revisão do supervisor.",
     "confirmation": {

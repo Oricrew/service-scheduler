@@ -18,6 +18,12 @@ const INITIAL_ORGANIZATION_SLUG = "demo-service-company";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_PATTERN = /^\d{2}:\d{2}$/;
 
+export type BookingFormState = {
+  error: "invalidDateTime" | null;
+};
+
+class BookingValidationError extends Error {}
+
 const serviceSlugs = [
   "repair",
   "maintenance",
@@ -67,7 +73,7 @@ function getRequiredField(formData: FormData, field: BookingField) {
   const normalizedValue = typeof value === "string" ? value.trim() : "";
 
   if (!normalizedValue) {
-    throw new Error(`Missing required field: ${field}`);
+    throw new BookingValidationError(`Missing required field: ${field}`);
   }
 
   return normalizedValue;
@@ -85,11 +91,26 @@ function getOptionalField(formData: FormData, field: string) {
 
 function assertValidDateTimeFormat(date: string, time: string) {
   if (!DATE_PATTERN.test(date) || !TIME_PATTERN.test(time)) {
-    throw new Error("Invalid requested date or time.");
+    throw new BookingValidationError("Invalid requested date or time.");
+  }
+
+  const [year, month, day] = date.split("-").map(Number);
+  const selectedDate = new Date(Date.UTC(year, month - 1, day));
+  const isValidDate =
+    selectedDate.getUTCFullYear() === year &&
+    selectedDate.getUTCMonth() === month - 1 &&
+    selectedDate.getUTCDate() === day;
+  const [hour, minute] = time.split(":").map(Number);
+  const isValidTime = hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+
+  if (!isValidDate || !isValidTime) {
+    throw new BookingValidationError("Invalid requested date or time.");
   }
 }
 
 function isWorkingHoursSlot(date: string, time: string) {
+  assertValidDateTimeFormat(date, time);
+
   const selectedDate = new Date(`${date}T00:00:00`);
   const day = selectedDate.getDay();
   const [hour, minute] = time.split(":").map(Number);
@@ -116,7 +137,7 @@ function createRequestedStartAt(date: string, time: string, timezone: string) {
   assertValidDateTimeFormat(date, time);
 
   if (!isWorkingHoursSlot(date, time)) {
-    throw new Error("Invalid time slot.");
+    throw new BookingValidationError("Invalid time slot.");
   }
 
   const utcGuess = new Date(`${date}T${time}:00.000Z`);
@@ -130,7 +151,7 @@ function parseServiceSlug(value: string) {
     return value;
   }
 
-  throw new Error("Invalid service type.");
+  throw new BookingValidationError("Invalid service type.");
 }
 
 function readBookingRequest(formData: FormData): BookingRequest {
@@ -141,7 +162,9 @@ function readBookingRequest(formData: FormData): BookingRequest {
   const requestedTime = getRequiredField(formData, "requestedTime");
 
   if (!isWorkingHoursSlot(requestedDate, requestedTime)) {
-    throw new Error("Requested time is outside working hours.");
+    throw new BookingValidationError(
+      "Requested time is outside working hours.",
+    );
   }
 
   return {
@@ -285,9 +308,21 @@ async function createPendingAppointment(
 
 export async function createAppointmentRequest(
   locale: string,
+  _previousState: BookingFormState,
   formData: FormData,
-) {
-  const booking = readBookingRequest(formData);
+): Promise<BookingFormState> {
+  let booking: BookingRequest;
+
+  try {
+    booking = readBookingRequest(formData);
+  } catch (error) {
+    if (error instanceof BookingValidationError) {
+      return { error: "invalidDateTime" };
+    }
+
+    throw error;
+  }
+
   const supabase = createSupabaseAdminClient();
 
   const organization = await getOrganization(supabase);

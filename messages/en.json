@@ -274,6 +274,9 @@
       }
     },
     "reviewNotice": "Send the request when your details are ready. A supervisor will review it before confirming the visit.",
+    "errors": {
+      "invalidDateTime": "Please choose a valid date and time within working hours."
+    },
     "cta": "Send request",
     "ctaNote": "Final confirmation stays pending until a supervisor reviews the request.",
     "confirmation": {
