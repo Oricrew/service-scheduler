@@ -306,5 +306,16 @@
     "technicians": "Técnicos",
     "unassigned": "Sin asignar",
     "footer": "Si guardaste el enlace de tu turno del primer correo, podés usarlo para ver los detalles actualizados."
+  },
+  "AppointmentReminderEmail": {
+    "subject": "Recordatorio: tu turno es hoy",
+    "greeting": "Hola {name},",
+    "intro": "Te recordamos que tu turno está programado para hoy.",
+    "service": "Servicio",
+    "dateTime": "Fecha y horario",
+    "address": "Dirección",
+    "technicians": "Técnicos",
+    "unassigned": "Sin asignar",
+    "footer": "Contactanos si necesitás actualizar algún detalle del turno."
   }
 }
