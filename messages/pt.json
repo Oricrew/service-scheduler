@@ -306,5 +306,16 @@
     "technicians": "Técnicos",
     "unassigned": "Sem atribuição",
     "footer": "Se você salvou o link do horário no primeiro e-mail, pode usá-lo para ver os detalhes atualizados."
+  },
+  "AppointmentReminderEmail": {
+    "subject": "Lembrete: seu horário é hoje",
+    "greeting": "Olá {name},",
+    "intro": "Este é um lembrete de que seu horário está agendado para hoje.",
+    "service": "Serviço",
+    "dateTime": "Data e horário",
+    "address": "Endereço",
+    "technicians": "Técnicos",
+    "unassigned": "Sem atribuição",
+    "footer": "Entre em contato se precisar atualizar algum detalhe do horário."
   }
 }

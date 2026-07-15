@@ -306,5 +306,16 @@
     "technicians": "Technicians",
     "unassigned": "Unassigned",
     "footer": "If you saved your appointment link from the first email, you can use it to view the updated details."
+  },
+  "AppointmentReminderEmail": {
+    "subject": "Reminder: your appointment is today",
+    "greeting": "Hi {name},",
+    "intro": "This is a reminder that your appointment is scheduled for today.",
+    "service": "Service",
+    "dateTime": "Date and time",
+    "address": "Address",
+    "technicians": "Technicians",
+    "unassigned": "Unassigned",
+    "footer": "Please contact us if you need to update any appointment details."
   }
 }
