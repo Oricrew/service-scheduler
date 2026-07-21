@@ -11,7 +11,7 @@ Recommended settings:
 - Build command: `npm run build`
 - Output directory: leave empty/default
 
-No `vercel.json` is needed yet.
+`vercel.json` defines the scheduled appointment reminder cron.
 
 ## Environment Variables
 
@@ -24,6 +24,10 @@ NEXT_PUBLIC_DEFAULT_LOCALE=es
 NEXT_PUBLIC_SUPPORTED_LOCALES=es,en,pt
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+RESEND_API_KEY=
+EMAIL_FROM=
+CRON_SECRET=
 NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE=54
 ```
 
