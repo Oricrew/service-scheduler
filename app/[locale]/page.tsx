@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
@@ -9,6 +10,15 @@ type Locale = (typeof routing.locales)[number];
 const benefits = ["booking", "approval", "mobile"] as const;
 const steps = ["request", "review", "visit"] as const;
 
+const clients = [
+  {
+    id: "refrigo",
+    logo: "/clients/refrigo/logotipo.svg",
+    width: 160,
+    height: 44,
+  },
+] as const;
+
 export default async function Home({
   params,
 }: Readonly<{
@@ -17,6 +27,7 @@ export default async function Home({
   const { locale } = await params;
   const currentLocale = locale as Locale;
   const t = await getTranslations({ locale, namespace: "Home" });
+  const tc = await getTranslations({ locale, namespace: "Clients" });
   const bookHref = `/${currentLocale}/book`;
   const dashboardHref = `/${currentLocale}/dashboard`;
 
@@ -135,6 +146,28 @@ export default async function Home({
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8">
+        <p className="text-center text-sm font-black uppercase tracking-[0.22em] text-slate-400">
+          {tc("eyebrow")}
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
+          {clients.map((client) => (
+            <Link
+              className="opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
+              href={`/${currentLocale}/${client.id}`}
+              key={client.id}
+            >
+              <Image
+                alt={client.id}
+                height={client.height}
+                src={client.logo}
+                width={client.width}
+              />
+            </Link>
+          ))}
         </div>
       </section>
 
