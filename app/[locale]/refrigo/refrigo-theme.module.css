@@ -1,0 +1,54 @@
+.theme {
+  --refrigo-primary: #e82020;
+  --refrigo-secondary: #1a1a6b;
+  --refrigo-primary-light: #fee2e2;
+  --refrigo-secondary-light: #eef2ff;
+}
+
+.eyebrow {
+  color: var(--refrigo-primary);
+}
+
+.ctaPrimary {
+  background-color: var(--refrigo-primary);
+  color: #fff;
+}
+
+.ctaPrimary:hover {
+  background-color: #c81a1a;
+}
+
+.previewCard {
+  background-color: var(--refrigo-secondary);
+}
+
+.previewBadge {
+  color: var(--refrigo-primary-light);
+}
+
+.previewAccent {
+  background-color: var(--refrigo-primary);
+  color: #fff;
+}
+
+.workflowBg {
+  background-color: var(--refrigo-secondary);
+}
+
+.workflowEyebrow {
+  color: var(--refrigo-primary-light);
+}
+
+.stepBadge {
+  background-color: var(--refrigo-primary);
+  color: #fff;
+}
+
+.finalCta {
+  background-color: var(--refrigo-primary);
+  color: #fff;
+}
+
+.finalCta:hover {
+  background-color: #c81a1a;
+}
