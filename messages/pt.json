@@ -317,5 +317,67 @@
     "technicians": "Técnicos",
     "unassigned": "Sem atribuição",
     "footer": "Entre em contato se precisar atualizar algum detalhe do horário."
+  },
+  "Clients": {
+    "eyebrow": "Nossos clientes",
+    "description": "Empresas que usam o Service Scheduler para organizar suas visitas técnicas."
+  },
+  "RefrigoShowcase": {
+    "brand": "Refrigo",
+    "tagline": "Soluções de Climatização",
+    "eyebrow": "Refrigo · Soluções de Climatização",
+    "title": "Agende visitas técnicas sem perder o controle operacional.",
+    "description": "Uma página simples para clientes solicitarem horários enquanto supervisores confirmam visitas, atribuem técnicos e mantêm a agenda organizada.",
+    "nav": {
+      "login": "Acesso interno"
+    },
+    "cta": {
+      "book": "Solicitar horário",
+      "login": "Abrir painel"
+    },
+    "preview": {
+      "badge": "Solicitação pendente",
+      "title": "Inspeção de climatização",
+      "clientLabel": "Cliente",
+      "client": "Maria Gomez · Palermo",
+      "timeLabel": "Horário",
+      "time": "Ter 10:30",
+      "statusLabel": "Status",
+      "status": "A confirmar"
+    },
+    "benefits": {
+      "booking": {
+        "title": "Reservas sem contas",
+        "description": "O cliente solicita uma visita pelo celular e informa os dados necessários para preparar o serviço."
+      },
+      "approval": {
+        "title": "Confirmação do supervisor",
+        "description": "Cada solicitação fica pendente até a equipe revisar disponibilidade, duração e técnicos."
+      },
+      "mobile": {
+        "title": "Agenda pronta para campo",
+        "description": "Supervisores e técnicos trabalham com uma visão pensada para uso diário no celular."
+      }
+    },
+    "workflow": {
+      "eyebrow": "Como funciona",
+      "request": {
+        "title": "O cliente solicita",
+        "description": "Escolhe serviço, data, horário de 30 minutos e compartilha endereço, equipamento e problema."
+      },
+      "review": {
+        "title": "O supervisor revisa",
+        "description": "Valida a solicitação, ajusta a duração e atribui um ou mais técnicos disponíveis."
+      },
+      "visit": {
+        "title": "A visita é agendada",
+        "description": "O cliente recebe um link seguro e a equipe vê o serviço confirmado na agenda."
+      }
+    },
+    "final": {
+      "title": "Pronto para começar com reservas reais.",
+      "description": "Primeiro, uma experiência pública clara. Depois, os fluxos de reserva, aprovação e agenda interna se conectam a esta base.",
+      "cta": "Solicitar visita"
+    }
   }
 }
