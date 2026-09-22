@@ -4,20 +4,12 @@ import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
+import { clients } from "@/lib/clients";
 
 type Locale = (typeof routing.locales)[number];
 
 const benefits = ["booking", "approval", "mobile"] as const;
 const steps = ["request", "review", "visit"] as const;
-
-const clients = [
-  {
-    id: "refrigo",
-    logo: "/clients/refrigo/logotipo.png",
-    width: 160,
-    height: 57,
-  },
-] as const;
 
 export default async function Home({
   params,
@@ -161,10 +153,10 @@ export default async function Home({
               key={client.id}
             >
               <Image
-                alt="Refrigo"
-                height={client.height}
-                src={client.logo}
-                width={client.width}
+                alt={tc(`${client.id}.name`)}
+                height={57}
+                src={client.logo.src}
+                width={160}
               />
             </Link>
           ))}
