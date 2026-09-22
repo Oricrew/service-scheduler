@@ -7,6 +7,12 @@ type SupabaseAdminEnv = SupabaseEnv & {
   serviceRoleKey: string;
 };
 
+export type AiEnv = {
+  enabled: boolean;
+  apiKey: string | undefined;
+  model: string;
+};
+
 function requireEnv(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
@@ -38,4 +44,13 @@ export function getSupabaseAdminEnv(): SupabaseAdminEnv {
       process.env.SUPABASE_SERVICE_ROLE_KEY,
     ),
   };
+}
+
+export function getAiEnv(): AiEnv {
+  const flag = process.env.AI_ENABLED;
+  const enabled = flag === "true" || flag === "1";
+  const apiKey = process.env.AI_API_KEY || undefined;
+  const model = process.env.AI_MODEL || "gpt-4o-mini";
+
+  return { enabled, apiKey, model };
 }
