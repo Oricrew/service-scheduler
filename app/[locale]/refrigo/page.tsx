@@ -34,8 +34,8 @@ export default async function RefrigoShowcase({
             alt="Refrigo"
             height={36}
             priority
-            src="/clients/refrigo/logotipo.svg"
-            width={130}
+            src="/clients/refrigo/logotipo.png"
+            width={101}
           />
         </Link>
         <div className="flex items-center gap-3">

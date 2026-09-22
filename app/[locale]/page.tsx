@@ -13,9 +13,9 @@ const steps = ["request", "review", "visit"] as const;
 const clients = [
   {
     id: "refrigo",
-    logo: "/clients/refrigo/logotipo.svg",
+    logo: "/clients/refrigo/logotipo.png",
     width: 160,
-    height: 44,
+    height: 57,
   },
 ] as const;
 
@@ -161,7 +161,7 @@ export default async function Home({
               key={client.id}
             >
               <Image
-                alt={client.id}
+                alt="Refrigo"
                 height={client.height}
                 src={client.logo}
                 width={client.width}
