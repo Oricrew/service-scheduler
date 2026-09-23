@@ -10,8 +10,12 @@ const REQUEST_TIMEOUT_MS = 20_000;
  */
 export const openAiCompatibleProvider: CompletionProvider = async (
   prompt,
-  { model, apiKey },
+  { model, apiKey, system },
 ) => {
+  const systemContent =
+    system ??
+    "You are a JSON-only assistant. Reply with valid JSON and nothing else.";
+
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -24,11 +28,7 @@ export const openAiCompatibleProvider: CompletionProvider = async (
       temperature: 0,
       response_format: { type: "json_object" },
       messages: [
-        {
-          role: "system",
-          content:
-            "You are a JSON-only assistant. Reply with valid JSON and nothing else.",
-        },
+        { role: "system", content: systemContent },
         { role: "user", content: prompt },
       ],
     }),

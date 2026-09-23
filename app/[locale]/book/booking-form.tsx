@@ -4,7 +4,11 @@ import { useActionState, useCallback, useRef, useState } from "react";
 
 import { TimeSlotPicker } from "@/components/booking/time-slot-picker";
 
-import type { BookingFormState, PrefillResult } from "./actions";
+import type {
+  BookingFormState,
+  PrefillErrorCode,
+  PrefillResult,
+} from "./actions";
 
 const initialBookingFormState: BookingFormState = {
   error: null,
@@ -49,11 +53,7 @@ type PrefillCopy = {
   placeholder: string;
   button: string;
   loading: string;
-  errors: {
-    empty: string;
-    tooLong: string;
-    aiError: string;
-  };
+  errors: Record<PrefillErrorCode, string>;
 };
 
 type BookingFormCopy = {
@@ -148,10 +148,7 @@ export function BookingForm({
       const result = await prefillAction(locale, prefillText);
 
       if (!result.ok) {
-        const errorKey = result.error as keyof PrefillCopy["errors"];
-        setPrefillError(
-          prefillCopy.errors[errorKey] ?? prefillCopy.errors.aiError,
-        );
+        setPrefillError(prefillCopy.errors[result.error]);
         return;
       }
 
@@ -202,6 +199,8 @@ export function BookingForm({
           data.clientNotes,
         );
       }
+    } catch {
+      setPrefillError(prefillCopy.errors.aiError);
     } finally {
       setPrefillLoading(false);
     }

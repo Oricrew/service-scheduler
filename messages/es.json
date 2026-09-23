@@ -282,7 +282,9 @@
       "errors": {
         "empty": "Escribí una descripción antes de completar.",
         "tooLong": "La descripción es demasiado larga (máximo 500 caracteres).",
-        "aiError": "No pudimos analizar la descripción. Completá los campos manualmente."
+        "aiError": "No pudimos analizar la descripción. Completá los campos manualmente.",
+        "noFields": "No encontramos datos para completar. Intentá con más detalle o completá los campos manualmente.",
+        "rateLimited": "Demasiadas solicitudes. Esperá un momento antes de intentar de nuevo."
       }
     },
     "reviewNotice": "Enviá la solicitud cuando los datos estén listos. Un supervisor la revisará antes de confirmar la visita.",

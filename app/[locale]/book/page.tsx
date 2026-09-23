@@ -56,6 +56,8 @@ export default async function BookPage({
               empty: t("prefill.errors.empty"),
               tooLong: t("prefill.errors.tooLong"),
               aiError: t("prefill.errors.aiError"),
+              noFields: t("prefill.errors.noFields"),
+              rateLimited: t("prefill.errors.rateLimited"),
             },
           },
         }
