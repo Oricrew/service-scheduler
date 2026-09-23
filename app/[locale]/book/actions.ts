@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
+import { completeJson } from "@/lib/ai";
 import {
   createAppointmentToken,
   hashAppointmentToken,
@@ -304,6 +306,79 @@ async function createPendingAppointment(
   }
 
   return { secureToken, requestedStartAt };
+}
+
+const prefillServiceSlugs = [
+  "repair",
+  "maintenance",
+  "installation",
+  "quotation-inspection",
+  "emergency-service",
+] as const;
+
+const prefillSchema = z.object({
+  serviceSlug: z.enum(prefillServiceSlugs).nullable(),
+  city: z.string().nullable(),
+  equipmentType: z.string().nullable(),
+  problemDescription: z.string().nullable(),
+  brandModel: z.string().nullable(),
+  clientNotes: z.string().nullable(),
+});
+
+export type PrefillResult =
+  | { ok: true; data: z.infer<typeof prefillSchema> }
+  | { ok: false; error: string };
+
+const MAX_DESCRIPTION_LENGTH = 500;
+
+function buildPrefillPrompt(description: string, locale: string): string {
+  return [
+    "You receive a short free-text description of a service job from a client.",
+    `The client's locale is "${locale}".`,
+    "Extract ONLY what the text explicitly supports into JSON.",
+    "",
+    "Fields:",
+    '- serviceSlug: one of "repair","maintenance","installation","quotation-inspection","emergency-service" — set ONLY when clearly implied; otherwise null',
+    "- city: city or neighbourhood mentioned; otherwise null",
+    "- equipmentType: equipment type mentioned (e.g. split, central, heater); otherwise null",
+    "- problemDescription: the core issue described; otherwise null",
+    "- brandModel: brand or model mentioned; otherwise null",
+    "- clientNotes: anything else relevant that does not fit above; otherwise null",
+    "",
+    "Rules:",
+    "- NEVER invent a person's name, phone number, email, or street address.",
+    "- If unsure about the service type, set serviceSlug to null.",
+    "- Keep extracted values short and factual.",
+    "- Respond in the same language the client used.",
+    "",
+    `Client description: "${description}"`,
+  ].join("\n");
+}
+
+export async function prefillFromDescription(
+  locale: string,
+  description: string,
+): Promise<PrefillResult> {
+  const trimmed = description.trim();
+
+  if (!trimmed) {
+    return { ok: false, error: "empty" };
+  }
+
+  if (trimmed.length > MAX_DESCRIPTION_LENGTH) {
+    return { ok: false, error: "tooLong" };
+  }
+
+  const result = await completeJson({
+    prompt: buildPrefillPrompt(trimmed, locale),
+    schema: prefillSchema,
+  });
+
+  if (!result.ok) {
+    return { ok: false, error: "aiError" };
+  }
+
+  return { ok: true, data: result.data };
 }
 
 export async function createAppointmentRequest(

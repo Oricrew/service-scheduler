@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useCallback, useRef, useState } from "react";
 
 import { TimeSlotPicker } from "@/components/booking/time-slot-picker";
 
-import type { BookingFormState } from "./actions";
+import type { BookingFormState, PrefillResult } from "./actions";
 
 const initialBookingFormState: BookingFormState = {
   error: null,
@@ -33,6 +33,27 @@ const optionalFields = ["brandModel", "clientNotes"] as const;
 const inputTypes: Partial<Record<(typeof requiredFields)[number], string>> = {
   email: "email",
   phone: "tel",
+};
+
+const slugToFormValue: Record<string, (typeof serviceTypes)[number]> = {
+  repair: "repair",
+  maintenance: "maintenance",
+  installation: "installation",
+  "quotation-inspection": "quotationInspection",
+  "emergency-service": "emergencyService",
+};
+
+type PrefillCopy = {
+  label: string;
+  description: string;
+  placeholder: string;
+  button: string;
+  loading: string;
+  errors: {
+    empty: string;
+    tooLong: string;
+    aiError: string;
+  };
 };
 
 type BookingFormCopy = {
@@ -65,6 +86,7 @@ type BookingFormCopy = {
   errors: {
     invalidDateTime: string;
   };
+  prefill?: PrefillCopy;
 };
 
 type BookingFormProps = Readonly<{
@@ -73,19 +95,162 @@ type BookingFormProps = Readonly<{
     formData: FormData,
   ) => Promise<BookingFormState>;
   copy: BookingFormCopy;
+  aiEnabled?: boolean;
+  prefillAction?: (
+    locale: string,
+    description: string,
+  ) => Promise<PrefillResult>;
+  locale?: string;
 }>;
 
-export function BookingForm({ action, copy }: BookingFormProps) {
+function setNativeInputValue(
+  el: HTMLInputElement | HTMLTextAreaElement | null,
+  value: string,
+) {
+  if (!el || !value) return;
+  const setter = Object.getOwnPropertyDescriptor(
+    el.tagName === "TEXTAREA"
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype,
+    "value",
+  )?.set;
+  setter?.call(el, value);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+export function BookingForm({
+  action,
+  copy,
+  aiEnabled,
+  prefillAction,
+  locale,
+}: BookingFormProps) {
   const [state, formAction, isPending] = useActionState(
     action,
     initialBookingFormState,
   );
 
+  const formRef = useRef<HTMLFormElement>(null);
+  const [prefillText, setPrefillText] = useState("");
+  const [prefillLoading, setPrefillLoading] = useState(false);
+  const [prefillError, setPrefillError] = useState<string | null>(null);
+
+  const prefillCopy = aiEnabled ? copy.prefill : undefined;
+  const showPrefill = !!prefillCopy && !!prefillAction && !!locale;
+
+  const handlePrefill = useCallback(async () => {
+    if (!prefillAction || !locale || !prefillCopy) return;
+
+    setPrefillError(null);
+    setPrefillLoading(true);
+
+    try {
+      const result = await prefillAction(locale, prefillText);
+
+      if (!result.ok) {
+        const errorKey = result.error as keyof PrefillCopy["errors"];
+        setPrefillError(
+          prefillCopy.errors[errorKey] ?? prefillCopy.errors.aiError,
+        );
+        return;
+      }
+
+      const form = formRef.current;
+      if (!form) return;
+      const data = result.data;
+
+      if (data.serviceSlug) {
+        const formKey = slugToFormValue[data.serviceSlug];
+        if (formKey) {
+          const serviceOption = copy.serviceType.options[formKey];
+          const radio = form.querySelector<HTMLInputElement>(
+            `input[name="serviceType"][value="${serviceOption.value}"]`,
+          );
+          if (radio) radio.checked = true;
+        }
+      }
+
+      if (data.city) {
+        setNativeInputValue(
+          form.querySelector<HTMLInputElement>('[name="city"]'),
+          data.city,
+        );
+      }
+      if (data.equipmentType) {
+        setNativeInputValue(
+          form.querySelector<HTMLInputElement>('[name="equipmentType"]'),
+          data.equipmentType,
+        );
+      }
+      if (data.problemDescription) {
+        setNativeInputValue(
+          form.querySelector<HTMLTextAreaElement>(
+            '[name="problemDescription"]',
+          ),
+          data.problemDescription,
+        );
+      }
+      if (data.brandModel) {
+        setNativeInputValue(
+          form.querySelector<HTMLInputElement>('[name="brandModel"]'),
+          data.brandModel,
+        );
+      }
+      if (data.clientNotes) {
+        setNativeInputValue(
+          form.querySelector<HTMLTextAreaElement>('[name="clientNotes"]'),
+          data.clientNotes,
+        );
+      }
+    } finally {
+      setPrefillLoading(false);
+    }
+  }, [
+    prefillAction,
+    locale,
+    prefillText,
+    prefillCopy,
+    copy.serviceType.options,
+  ]);
+
   return (
     <form
+      ref={formRef}
       action={formAction}
       className="mt-10 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8"
     >
+      {showPrefill ? (
+        <div className="mb-8 rounded-2xl border border-sky-200 bg-sky-50/50 p-5">
+          <p className="text-sm font-bold text-slate-800">
+            {prefillCopy.label}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            {prefillCopy.description}
+          </p>
+          <textarea
+            className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            maxLength={500}
+            onChange={(e) => setPrefillText(e.target.value)}
+            placeholder={prefillCopy.placeholder}
+            rows={3}
+            value={prefillText}
+          />
+          {prefillError ? (
+            <p className="mt-2 text-sm font-bold text-red-700">
+              {prefillError}
+            </p>
+          ) : null}
+          <button
+            className="mt-3 rounded-full bg-sky-700 px-5 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-400"
+            disabled={prefillLoading || !prefillText.trim()}
+            onClick={handlePrefill}
+            type="button"
+          >
+            {prefillLoading ? prefillCopy.loading : prefillCopy.button}
+          </button>
+        </div>
+      ) : null}
+
       <fieldset className="mb-8">
         <legend className="text-sm font-bold text-slate-800">
           {copy.serviceType.label}

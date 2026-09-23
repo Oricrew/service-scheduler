@@ -273,6 +273,18 @@
         "placeholder": "Preferencias de contacto, referencias de acceso o detalles útiles."
       }
     },
+    "prefill": {
+      "label": "Describí lo que necesitás",
+      "description": "Escribí una descripción corta y completamos los campos del formulario. Podés editarlos antes de enviar.",
+      "placeholder": "Ej: el split de Palermo no enfría, preferimos martes a la mañana, mantenimiento si es posible.",
+      "button": "Completar campos",
+      "loading": "Analizando…",
+      "errors": {
+        "empty": "Escribí una descripción antes de completar.",
+        "tooLong": "La descripción es demasiado larga (máximo 500 caracteres).",
+        "aiError": "No pudimos analizar la descripción. Completá los campos manualmente."
+      }
+    },
     "reviewNotice": "Enviá la solicitud cuando los datos estén listos. Un supervisor la revisará antes de confirmar la visita.",
     "errors": {
       "invalidDateTime": "Elegí una fecha y un horario válidos dentro del horario de atención."
