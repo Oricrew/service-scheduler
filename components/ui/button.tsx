@@ -1,13 +1,13 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 const base =
-  "inline-flex items-center justify-center font-black transition disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center transition disabled:cursor-not-allowed";
 
 const variants = {
   primary:
-    "rounded-button bg-foreground text-surface-elevated shadow-sm hover:bg-foreground/85 disabled:bg-muted disabled:hover:bg-muted",
+    "rounded-button font-black bg-foreground text-surface-elevated shadow-sm hover:bg-foreground/85 disabled:bg-muted disabled:hover:bg-muted",
   secondary:
-    "rounded-button border border-border font-bold text-foreground hover:border-primary hover:bg-primary-light",
+    "rounded-button font-bold border border-border text-foreground hover:border-primary hover:bg-primary-light",
   ghost:
     "rounded-button font-bold text-muted hover:bg-primary-light hover:text-primary",
 } as const;
