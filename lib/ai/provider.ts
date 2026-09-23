@@ -1,5 +1,7 @@
 import type { CompletionProvider } from "./types";
 
+const REQUEST_TIMEOUT_MS = 20_000;
+
 /**
  * Minimal fetch-based provider that calls an OpenAI-compatible
  * chat-completions endpoint.  Keeps the dependency footprint small —
@@ -12,6 +14,7 @@ export const openAiCompatibleProvider: CompletionProvider = async (
 ) => {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
@@ -19,6 +22,7 @@ export const openAiCompatibleProvider: CompletionProvider = async (
     body: JSON.stringify({
       model,
       temperature: 0,
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
@@ -31,8 +35,7 @@ export const openAiCompatibleProvider: CompletionProvider = async (
   });
 
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`AI provider returned ${res.status}: ${body}`);
+    throw new Error(`AI provider returned HTTP ${res.status}`);
   }
 
   const json = (await res.json()) as {

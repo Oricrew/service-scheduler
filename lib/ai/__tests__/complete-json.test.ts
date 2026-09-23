@@ -71,6 +71,22 @@ describe("completeJson", () => {
         error: "AI_API_KEY is not set",
       });
     });
+
+    it("treats a whitespace-only API key as missing", async () => {
+      vi.stubEnv("AI_ENABLED", "true");
+      vi.stubEnv("AI_API_KEY", "   ");
+
+      const result = await completeJson({
+        prompt: "test",
+        schema: SuggestionSchema,
+        provider: fakeProvider("{}"),
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        error: "AI_API_KEY is not set",
+      });
+    });
   });
 
   describe("with valid configuration", () => {
@@ -173,6 +189,34 @@ describe("completeJson", () => {
       });
 
       expect(result.ok).toBe(false);
+    });
+
+    it("strips markdown json fences before parsing", async () => {
+      const fenced = '```json\n{"title": "Repair", "duration": 60}\n```';
+      const result = await completeJson({
+        prompt: "suggest a service",
+        schema: SuggestionSchema,
+        provider: fakeProvider(fenced),
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        data: { title: "Repair", duration: 60 },
+      });
+    });
+
+    it("strips plain markdown fences without language tag", async () => {
+      const fenced = '```\n{"title": "Install", "duration": 45}\n```';
+      const result = await completeJson({
+        prompt: "suggest a service",
+        schema: SuggestionSchema,
+        provider: fakeProvider(fenced),
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        data: { title: "Install", duration: 45 },
+      });
     });
   });
 });

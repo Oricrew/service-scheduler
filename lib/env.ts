@@ -49,7 +49,7 @@ export function getSupabaseAdminEnv(): SupabaseAdminEnv {
 export function getAiEnv(): AiEnv {
   const flag = process.env.AI_ENABLED;
   const enabled = flag === "true" || flag === "1";
-  const apiKey = process.env.AI_API_KEY || undefined;
+  const apiKey = process.env.AI_API_KEY?.trim() || undefined;
   const model = process.env.AI_MODEL || "gpt-4o-mini";
 
   return { enabled, apiKey, model };

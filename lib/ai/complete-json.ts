@@ -44,7 +44,7 @@ export async function completeJson<S extends z.ZodTypeAny>(
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(stripMarkdownFences(raw));
   } catch {
     return { ok: false, error: "AI response is not valid JSON" };
   }
@@ -59,4 +59,12 @@ export async function completeJson<S extends z.ZodTypeAny>(
   }
 
   return { ok: true, data: result.data };
+}
+
+const MARKDOWN_FENCE_RE = /^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/;
+
+function stripMarkdownFences(text: string): string {
+  const trimmed = text.trim();
+  const match = MARKDOWN_FENCE_RE.exec(trimmed);
+  return match ? match[1] : trimmed;
 }
