@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from "react";
+import { createElement, type HTMLAttributes, type ReactNode } from "react";
 
 const base =
   "rounded-card bg-surface-elevated p-5 shadow-sm ring-1 ring-border sm:p-8";
@@ -17,9 +17,12 @@ export function Card({ className, children, ...props }: CardProps) {
   );
 }
 
+type HeadingLevel = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
 type CardHeaderProps = {
   eyebrow?: string;
   title: string;
+  titleAs?: HeadingLevel;
   description?: string;
   children?: ReactNode;
 };
@@ -27,9 +30,17 @@ type CardHeaderProps = {
 export function CardHeader({
   eyebrow,
   title,
+  titleAs = "h2",
   description,
   children,
 }: CardHeaderProps) {
+  const titleClassName = [
+    "text-4xl font-black leading-none tracking-tight",
+    eyebrow ? "mt-4" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div>
       {eyebrow ? (
@@ -37,16 +48,7 @@ export function CardHeader({
           {eyebrow}
         </p>
       ) : null}
-      <h1
-        className={[
-          "text-4xl font-black leading-none tracking-tight",
-          eyebrow ? "mt-4" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        {title}
-      </h1>
+      {createElement(titleAs, { className: titleClassName }, title)}
       {description ? (
         <p className="mt-4 text-lg leading-8 text-muted">{description}</p>
       ) : null}
