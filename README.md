@@ -108,6 +108,7 @@ npm run dev
 Quality checks:
 
 ```sh
+npm test
 npm run lint
 npm run typecheck
 npm run format:check
