@@ -1,7 +1,9 @@
 import type { z } from "zod";
 
-import { getAiEnv } from "@/lib/env";
+import { getAiEnv, getAiFallbackEnv } from "@/lib/env";
 import { geminiProvider } from "./provider";
+import { openaiProvider } from "./openai-provider";
+import { createFallbackProvider, type ProviderEntry } from "./fallback-chain";
 import type { AiResult, CompleteJsonOptions } from "./types";
 
 /**
@@ -13,6 +15,7 @@ import type { AiResult, CompleteJsonOptions } from "./types";
  *  - `GEMINI_API_KEY` is missing
  *  - The provider response is not valid JSON
  *  - The JSON does not satisfy the supplied schema
+ *  - All providers in the fallback chain fail
  *
  * This function never throws — callers always get an `AiResult<T>`.
  */
@@ -29,7 +32,8 @@ export async function completeJson<S extends z.ZodTypeAny>(
     return { ok: false, error: "GEMINI_API_KEY is not set" };
   }
 
-  const provider = options.provider ?? geminiProvider;
+  const provider =
+    options.provider ?? buildFallbackProvider(env.apiKey, env.model);
 
   let raw: string;
   try {
@@ -60,6 +64,38 @@ export async function completeJson<S extends z.ZodTypeAny>(
   }
 
   return { ok: true, data: result.data };
+}
+
+function buildFallbackProvider(primaryApiKey: string, primaryModel: string) {
+  const fallbackEnv = getAiFallbackEnv();
+  const entries: ProviderEntry[] = [];
+
+  entries.push({
+    name: "gemini-primary",
+    provider: geminiProvider,
+    model: primaryModel,
+    apiKey: primaryApiKey,
+  });
+
+  if (fallbackEnv.fallbackModel) {
+    entries.push({
+      name: "gemini-fallback",
+      provider: geminiProvider,
+      model: fallbackEnv.fallbackModel,
+      apiKey: primaryApiKey,
+    });
+  }
+
+  if (fallbackEnv.openaiApiKey) {
+    entries.push({
+      name: "openai-fallback",
+      provider: openaiProvider,
+      model: fallbackEnv.openaiModel,
+      apiKey: fallbackEnv.openaiApiKey,
+    });
+  }
+
+  return createFallbackProvider(entries);
 }
 
 const MARKDOWN_FENCE_RE = /^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/;
