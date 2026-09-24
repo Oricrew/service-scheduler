@@ -320,64 +320,68 @@
   },
   "Clients": {
     "eyebrow": "Nuestros clientes",
-    "description": "Empresas que usan Service Scheduler para organizar sus visitas técnicas."
+    "description": "Empresas que usan Service Scheduler para organizar sus visitas técnicas.",
+    "refrigo": {
+      "name": "Refrigo"
+    }
   },
-  "RefrigoShowcase": {
-    "brand": "Refrigo",
-    "tagline": "Soluciones de Climatización",
-    "eyebrow": "Refrigo · Soluciones de Climatización",
-    "title": "Agenda visitas técnicas sin perder el control operativo.",
-    "description": "Una página simple para que tus clientes pidan turno, mientras el supervisor confirma horarios, asigna técnicos y mantiene la agenda ordenada.",
-    "nav": {
-      "login": "Acceso interno"
-    },
-    "cta": {
-      "book": "Solicitar turno",
-      "login": "Entrar al panel"
-    },
-    "preview": {
-      "badge": "Solicitud pendiente",
-      "title": "Revisión de climatización",
-      "clientLabel": "Cliente",
-      "client": "María Gómez · Palermo",
-      "timeLabel": "Horario",
-      "time": "Mar 10:30",
-      "statusLabel": "Estado",
-      "status": "A confirmar"
-    },
-    "benefits": {
-      "booking": {
-        "title": "Reservas sin cuentas",
-        "description": "El cliente pide una visita desde el celular y deja los datos necesarios para preparar el trabajo."
+  "ClientShowcase": {
+    "refrigo": {
+      "tagline": "Soluciones de Climatización",
+      "eyebrow": "Refrigo · Soluciones de Climatización",
+      "title": "Agenda visitas técnicas sin perder el control operativo.",
+      "description": "Una página simple para que tus clientes pidan turno, mientras el supervisor confirma horarios, asigna técnicos y mantiene la agenda ordenada.",
+      "nav": {
+        "login": "Acceso interno"
       },
-      "approval": {
-        "title": "Confirmación del supervisor",
-        "description": "Cada solicitud queda pendiente hasta que el equipo revise disponibilidad, duración y técnicos."
+      "cta": {
+        "book": "Solicitar turno",
+        "login": "Entrar al panel"
       },
-      "mobile": {
-        "title": "Agenda lista para campo",
-        "description": "Supervisores y técnicos pueden trabajar con una vista pensada para el uso diario desde mobile."
+      "preview": {
+        "badge": "Solicitud pendiente",
+        "title": "Revisión de climatización",
+        "clientLabel": "Cliente",
+        "client": "María Gómez · Palermo",
+        "timeLabel": "Horario",
+        "time": "Mar 10:30",
+        "statusLabel": "Estado",
+        "status": "A confirmar"
+      },
+      "benefits": {
+        "booking": {
+          "title": "Reservas sin cuentas",
+          "description": "El cliente pide una visita desde el celular y deja los datos necesarios para preparar el trabajo."
+        },
+        "approval": {
+          "title": "Confirmación del supervisor",
+          "description": "Cada solicitud queda pendiente hasta que el equipo revise disponibilidad, duración y técnicos."
+        },
+        "mobile": {
+          "title": "Agenda lista para campo",
+          "description": "Supervisores y técnicos pueden trabajar con una vista pensada para el uso diario desde mobile."
+        }
+      },
+      "workflow": {
+        "eyebrow": "Cómo funciona",
+        "request": {
+          "title": "El cliente solicita",
+          "description": "Elige servicio, fecha, horario de 30 minutos y comparte dirección, equipo y problema."
+        },
+        "review": {
+          "title": "El supervisor revisa",
+          "description": "Valida la solicitud, ajusta duración y asigna uno o más técnicos disponibles."
+        },
+        "visit": {
+          "title": "La visita queda agendada",
+          "description": "El cliente recibe un enlace seguro y el equipo ve el trabajo confirmado en la agenda."
+        }
+      },
+      "final": {
+        "title": "Listo para empezar con reservas reales.",
+        "description": "Primero una experiencia pública clara. Después, el flujo de reservas, aprobaciones y agenda interna se conecta sobre esta base.",
+        "cta": "Pedir un turno"
       }
-    },
-    "workflow": {
-      "eyebrow": "Cómo funciona",
-      "request": {
-        "title": "El cliente solicita",
-        "description": "Elige servicio, fecha, horario de 30 minutos y comparte dirección, equipo y problema."
-      },
-      "review": {
-        "title": "El supervisor revisa",
-        "description": "Valida la solicitud, ajusta duración y asigna uno o más técnicos disponibles."
-      },
-      "visit": {
-        "title": "La visita queda agendada",
-        "description": "El cliente recibe un enlace seguro y el equipo ve el trabajo confirmado en la agenda."
-      }
-    },
-    "final": {
-      "title": "Listo para empezar con reservas reales.",
-      "description": "Primero una experiencia pública clara. Después, el flujo de reservas, aprobaciones y agenda interna se conecta sobre esta base.",
-      "cta": "Pedir un turno"
     }
   }
 }

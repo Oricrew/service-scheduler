@@ -1,41 +1,67 @@
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
+import { clients, getClient } from "@/lib/clients";
 
-import styles from "./refrigo-theme.module.css";
+import styles from "./client-theme.module.css";
 
 type Locale = (typeof routing.locales)[number];
 
 const benefits = ["booking", "approval", "mobile"] as const;
 const steps = ["request", "review", "visit"] as const;
 
-export default async function RefrigoShowcase({
+export function generateStaticParams() {
+  return clients.map((c) => ({ clientId: c.id }));
+}
+
+export default async function ClientShowcase({
   params,
 }: Readonly<{
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; clientId: string }>;
 }>) {
-  const { locale } = await params;
+  const { locale, clientId } = await params;
+  const client = getClient(clientId);
+  if (!client) notFound();
+
   const currentLocale = locale as Locale;
-  const t = await getTranslations({ locale, namespace: "RefrigoShowcase" });
+  const t = await getTranslations({
+    locale,
+    namespace: `ClientShowcase.${clientId}`,
+  });
+  const tc = await getTranslations({ locale, namespace: "Clients" });
   const bookHref = `/${currentLocale}/book`;
   const dashboardHref = `/${currentLocale}/dashboard`;
 
+  const logoWidth = Math.round(36 * (client.logo.width / client.logo.height));
+
+  const themeVars = {
+    "--client-primary": client.theme.primary,
+    "--client-primary-hover": client.theme.primaryHover,
+    "--client-primary-light": client.theme.primaryLight,
+    "--client-secondary": client.theme.secondary,
+    "--client-secondary-light": client.theme.secondaryLight,
+  } as React.CSSProperties;
+
   return (
-    <main className={`min-h-screen bg-slate-50 text-slate-950 ${styles.theme}`}>
+    <main
+      className={`min-h-screen bg-slate-50 text-slate-950 ${styles.theme}`}
+      style={themeVars}
+    >
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
         <Link
           className="flex items-center gap-3"
-          href={`/${currentLocale}/refrigo`}
+          href={`/${currentLocale}/${clientId}`}
         >
           <Image
-            alt="Refrigo"
+            alt={tc(`${clientId}.name`)}
             height={36}
             priority
-            src="/clients/refrigo/logotipo.svg"
-            width={130}
+            src={client.logo.src}
+            width={logoWidth}
           />
         </Link>
         <div className="flex items-center gap-3">

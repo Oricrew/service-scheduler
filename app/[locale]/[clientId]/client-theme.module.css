@@ -1,0 +1,51 @@
+.theme {
+  /* Tokens set via inline style from the client registry */
+}
+
+.eyebrow {
+  color: var(--client-primary);
+}
+
+.ctaPrimary {
+  background-color: var(--client-primary);
+  color: #fff;
+}
+
+.ctaPrimary:hover {
+  background-color: var(--client-primary-hover);
+}
+
+.previewCard {
+  background-color: var(--client-secondary);
+}
+
+.previewBadge {
+  color: var(--client-primary-light);
+}
+
+.previewAccent {
+  background-color: var(--client-primary);
+  color: #fff;
+}
+
+.workflowBg {
+  background-color: var(--client-secondary);
+}
+
+.workflowEyebrow {
+  color: var(--client-primary-light);
+}
+
+.stepBadge {
+  background-color: var(--client-primary);
+  color: #fff;
+}
+
+.finalCta {
+  background-color: var(--client-primary);
+  color: #fff;
+}
+
+.finalCta:hover {
+  background-color: var(--client-primary-hover);
+}

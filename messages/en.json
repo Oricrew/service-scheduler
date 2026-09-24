@@ -320,64 +320,68 @@
   },
   "Clients": {
     "eyebrow": "Our clients",
-    "description": "Companies using Service Scheduler to organize their field visits."
+    "description": "Companies using Service Scheduler to organize their field visits.",
+    "refrigo": {
+      "name": "Refrigo"
+    }
   },
-  "RefrigoShowcase": {
-    "brand": "Refrigo",
-    "tagline": "HVAC Solutions",
-    "eyebrow": "Refrigo · HVAC Solutions",
-    "title": "Schedule field visits without losing operational control.",
-    "description": "A simple page for clients to request appointments while supervisors confirm times, assign technicians, and keep the agenda organized.",
-    "nav": {
-      "login": "Internal access"
-    },
-    "cta": {
-      "book": "Request appointment",
-      "login": "Open dashboard"
-    },
-    "preview": {
-      "badge": "Pending request",
-      "title": "HVAC inspection",
-      "clientLabel": "Client",
-      "client": "Maria Gomez · Palermo",
-      "timeLabel": "Time",
-      "time": "Tue 10:30",
-      "statusLabel": "Status",
-      "status": "To confirm"
-    },
-    "benefits": {
-      "booking": {
-        "title": "Bookings without accounts",
-        "description": "Clients request a visit from mobile and share the details needed to prepare the job."
+  "ClientShowcase": {
+    "refrigo": {
+      "tagline": "HVAC Solutions",
+      "eyebrow": "Refrigo · HVAC Solutions",
+      "title": "Schedule field visits without losing operational control.",
+      "description": "A simple page for clients to request appointments while supervisors confirm times, assign technicians, and keep the agenda organized.",
+      "nav": {
+        "login": "Internal access"
       },
-      "approval": {
-        "title": "Supervisor confirmation",
-        "description": "Every request stays pending until the team reviews availability, duration, and technicians."
+      "cta": {
+        "book": "Request appointment",
+        "login": "Open dashboard"
       },
-      "mobile": {
-        "title": "Field-ready agenda",
-        "description": "Supervisors and technicians can work from a view designed for daily mobile use."
+      "preview": {
+        "badge": "Pending request",
+        "title": "HVAC inspection",
+        "clientLabel": "Client",
+        "client": "Maria Gomez · Palermo",
+        "timeLabel": "Time",
+        "time": "Tue 10:30",
+        "statusLabel": "Status",
+        "status": "To confirm"
+      },
+      "benefits": {
+        "booking": {
+          "title": "Bookings without accounts",
+          "description": "Clients request a visit from mobile and share the details needed to prepare the job."
+        },
+        "approval": {
+          "title": "Supervisor confirmation",
+          "description": "Every request stays pending until the team reviews availability, duration, and technicians."
+        },
+        "mobile": {
+          "title": "Field-ready agenda",
+          "description": "Supervisors and technicians can work from a view designed for daily mobile use."
+        }
+      },
+      "workflow": {
+        "eyebrow": "How it works",
+        "request": {
+          "title": "The client requests",
+          "description": "They choose a service, date, 30-minute time slot, and share address, equipment, and problem details."
+        },
+        "review": {
+          "title": "The supervisor reviews",
+          "description": "They validate the request, adjust duration, and assign one or more available technicians."
+        },
+        "visit": {
+          "title": "The visit is scheduled",
+          "description": "The client receives a secure link and the team sees the confirmed job in the agenda."
+        }
+      },
+      "final": {
+        "title": "Ready to start with real booking requests.",
+        "description": "First, a clear public experience. Next, booking, approval, and internal scheduling flows can connect on this foundation.",
+        "cta": "Request a visit"
       }
-    },
-    "workflow": {
-      "eyebrow": "How it works",
-      "request": {
-        "title": "The client requests",
-        "description": "They choose a service, date, 30-minute time slot, and share address, equipment, and problem details."
-      },
-      "review": {
-        "title": "The supervisor reviews",
-        "description": "They validate the request, adjust duration, and assign one or more available technicians."
-      },
-      "visit": {
-        "title": "The visit is scheduled",
-        "description": "The client receives a secure link and the team sees the confirmed job in the agenda."
-      }
-    },
-    "final": {
-      "title": "Ready to start with real booking requests.",
-      "description": "First, a clear public experience. Next, booking, approval, and internal scheduling flows can connect on this foundation.",
-      "cta": "Request a visit"
     }
   }
 }
