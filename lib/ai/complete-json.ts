@@ -1,7 +1,7 @@
 import type { z } from "zod";
 
 import { getAiEnv } from "@/lib/env";
-import { openAiCompatibleProvider } from "./provider";
+import { geminiProvider } from "./provider";
 import type { AiResult, CompleteJsonOptions } from "./types";
 
 /**
@@ -10,7 +10,7 @@ import type { AiResult, CompleteJsonOptions } from "./types";
  *
  * Returns `{ ok: false, error }` when:
  *  - AI is disabled via `AI_ENABLED`
- *  - `AI_API_KEY` is missing
+ *  - `GEMINI_API_KEY` is missing
  *  - The provider response is not valid JSON
  *  - The JSON does not satisfy the supplied schema
  *
@@ -26,10 +26,10 @@ export async function completeJson<S extends z.ZodTypeAny>(
   }
 
   if (!env.apiKey) {
-    return { ok: false, error: "AI_API_KEY is not set" };
+    return { ok: false, error: "GEMINI_API_KEY is not set" };
   }
 
-  const provider = options.provider ?? openAiCompatibleProvider;
+  const provider = options.provider ?? geminiProvider;
 
   let raw: string;
   try {
