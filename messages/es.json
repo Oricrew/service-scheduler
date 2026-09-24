@@ -284,7 +284,9 @@
         "tooLong": "La descripción es demasiado larga (máximo 500 caracteres).",
         "aiError": "No pudimos analizar la descripción. Completá los campos manualmente.",
         "noFields": "No encontramos datos para completar. Intentá con más detalle o completá los campos manualmente.",
-        "rateLimited": "Demasiadas solicitudes. Esperá un momento antes de intentar de nuevo."
+        "rateLimited": "Demasiadas solicitudes. Esperá un momento antes de intentar de nuevo.",
+        "unauthenticated": "Iniciá sesión para usar el asistente de IA.",
+        "disabled": "El asistente de IA no está disponible en este momento."
       }
     },
     "reviewNotice": "Enviá la solicitud cuando los datos estén listos. Un supervisor la revisará antes de confirmar la visita.",

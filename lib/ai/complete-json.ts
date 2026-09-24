@@ -37,6 +37,7 @@ export async function completeJson<S extends z.ZodTypeAny>(
       model: env.model,
       apiKey: env.apiKey,
       system: options.system,
+      maxTokens: options.maxTokens,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

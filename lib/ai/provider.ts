@@ -10,7 +10,7 @@ const REQUEST_TIMEOUT_MS = 20_000;
  */
 export const openAiCompatibleProvider: CompletionProvider = async (
   prompt,
-  { model, apiKey, system },
+  { model, apiKey, system, maxTokens },
 ) => {
   const systemContent =
     system ??
@@ -27,6 +27,7 @@ export const openAiCompatibleProvider: CompletionProvider = async (
       model,
       temperature: 0,
       response_format: { type: "json_object" },
+      ...(maxTokens ? { max_tokens: maxTokens } : {}),
       messages: [
         { role: "system", content: systemContent },
         { role: "user", content: prompt },
