@@ -36,6 +36,7 @@ export async function completeJson<S extends z.ZodTypeAny>(
     raw = await provider(options.prompt, {
       model: env.model,
       apiKey: env.apiKey,
+      system: options.system,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

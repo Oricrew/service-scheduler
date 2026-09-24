@@ -2,9 +2,10 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { isAiConfigured } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
-import { createAppointmentRequest } from "./actions";
+import { createAppointmentRequest, prefillFromDescription } from "./actions";
 import { BookingForm } from "./booking-form";
 
 type Locale = (typeof routing.locales)[number];
@@ -37,11 +38,30 @@ export default async function BookPage({
   const { locale } = await params;
   const currentLocale = locale as Locale;
   const t = await getTranslations({ locale, namespace: "Book" });
+  const aiEnabled = isAiConfigured();
   const createAppointmentRequestWithLocale = createAppointmentRequest.bind(
     null,
     currentLocale,
   );
   const formCopy = {
+    ...(aiEnabled
+      ? {
+          prefill: {
+            label: t("prefill.label"),
+            description: t("prefill.description"),
+            placeholder: t("prefill.placeholder"),
+            button: t("prefill.button"),
+            loading: t("prefill.loading"),
+            errors: {
+              empty: t("prefill.errors.empty"),
+              tooLong: t("prefill.errors.tooLong"),
+              aiError: t("prefill.errors.aiError"),
+              noFields: t("prefill.errors.noFields"),
+              rateLimited: t("prefill.errors.rateLimited"),
+            },
+          },
+        }
+      : {}),
     required: t("required"),
     optional: t("optional"),
     cta: t("cta"),
@@ -117,7 +137,10 @@ export default async function BookPage({
 
         <BookingForm
           action={createAppointmentRequestWithLocale}
+          aiEnabled={aiEnabled}
           copy={formCopy}
+          locale={currentLocale}
+          prefillAction={aiEnabled ? prefillFromDescription : undefined}
         />
       </section>
     </main>

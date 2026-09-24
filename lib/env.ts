@@ -54,3 +54,8 @@ export function getAiEnv(): AiEnv {
 
   return { enabled, apiKey, model };
 }
+
+export function isAiConfigured(): boolean {
+  const { enabled, apiKey } = getAiEnv();
+  return enabled && !!apiKey;
+}

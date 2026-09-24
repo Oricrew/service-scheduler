@@ -273,6 +273,20 @@
         "placeholder": "Contact preferences, access notes, or other helpful details."
       }
     },
+    "prefill": {
+      "label": "Describe what you need",
+      "description": "Write a short description and we'll fill in the form fields. You can edit them before submitting.",
+      "placeholder": "E.g.: split in Palermo not cooling, prefer Tuesday morning, maintenance if possible.",
+      "button": "Fill in fields",
+      "loading": "Analyzing…",
+      "errors": {
+        "empty": "Write a description before filling in.",
+        "tooLong": "The description is too long (max 500 characters).",
+        "aiError": "We couldn't analyze the description. Please fill in the fields manually.",
+        "noFields": "We couldn't extract any details. Try adding more information or fill in the fields manually.",
+        "rateLimited": "Too many requests. Please wait a moment and try again."
+      }
+    },
     "reviewNotice": "Send the request when your details are ready. A supervisor will review it before confirming the visit.",
     "errors": {
       "invalidDateTime": "Please choose a valid date and time within working hours."
