@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+@theme {
+  --color-surface: #f8fafc;
+  --color-surface-elevated: #ffffff;
+  --color-foreground: #020617;
+  --color-muted: #64748b;
+  --color-primary: #0369a1;
+  --color-primary-light: #f0f9ff;
+  --color-border: #e2e8f0;
+  --color-ring-focus: #e0f2fe;
+  --radius-card: 2rem;
+  --radius-button: 9999px;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -11,5 +24,7 @@ body {
 }
 
 body {
+  background-color: var(--color-surface);
+  color: var(--color-foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
