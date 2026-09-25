@@ -6,6 +6,7 @@ Service Scheduler includes an optional, **server-only** AI helper that
 generates structured JSON from an AI model provider. The first user-facing
 feature is **booking-form prefill** — a client describes their problem in
 free text and the AI extracts structured fields to pre-populate the form.
+Booking stays public: no login is required to use prefill.
 
 ## What is sent to the provider
 
@@ -22,12 +23,12 @@ approve.
 ## Configuration
 
 | Variable | Required | Default | Description |
-| ---------------------- | -------- | ------------- | -------------------------------------------------------- |
+| ---------------------- | -------- | ------------- | --------------------------------------------- |
 | `AI_ENABLED` | no | `false` | Kill switch — set `true` to activate AI features |
 | `AI_API_KEY` | yes\* | — | API key for the provider (server-only) |
 | `AI_MODEL` | no | `gpt-4o-mini` | Model identifier for completions |
-| `AI_RATE_LIMIT_RPM` | no | `10` | Max prefill requests per user+IP per minute |
-| `AI_RATE_LIMIT_DAILY` | no | `100` | Max prefill requests per user+IP per 24 h rolling window |
+| `AI_RATE_LIMIT_RPM` | no | `5` | Max prefill requests per IP per minute |
+| `AI_RATE_LIMIT_DAILY` | no | `25` | Max prefill requests per IP per 24 h rolling window |
 | `AI_SPIKE_THRESHOLD` | no | `50` | Request count in 5 min that triggers a spike-alert log |
 
 \*Required only when `AI_ENABLED=true`.
@@ -45,11 +46,12 @@ The booking form hides the prefill section when AI is not configured.
 
 - **API key is server-only** — `AI_API_KEY` is never exposed to the browser.
   All AI calls happen in server-side code (`lib/ai/`).
-- **Authentication required** — the `POST /api/ai/prefill` route checks the
-  Supabase session cookie; unauthenticated requests receive `401`.
-- **Per-user + IP rate limiting** — an in-memory sliding-window limiter
-  enforces both RPM and daily caps keyed on `userId:clientIP`. Exceeding
-  either limit returns `429` with a `Retry-After` header.
+- **Public endpoint** — `POST /api/ai/prefill` is available without a session
+  because booking is public. If AI fails or is rate-limited, the client
+  completes the form manually.
+- **Per-IP rate limiting** — an in-memory sliding-window limiter enforces
+  both RPM and daily caps keyed on client IP. Exceeding either limit returns
+  `429` with a `Retry-After` header.
 - **Request body cap** — bodies larger than 2 KB are rejected (`413`);
   description text is further capped at 500 characters.
 - **Output token cap** — the provider call sets `max_tokens: 512` to bound
@@ -57,7 +59,7 @@ The booking form hides the prefill section when AI is not configured.
 - **Zod schema validation** — AI responses are validated against a strict
   schema before the app uses them.
 - **Usage logging** — every prefill call is logged as structured JSON to
-  stdout (user, IP, latency, outcome). When requests in a 5-minute window
+  stdout (IP, latency, outcome). When requests in a 5-minute window
   exceed `AI_SPIKE_THRESHOLD`, an `[AI_SPIKE_ALERT]` warning is emitted.
 
 ## Architecture
@@ -65,8 +67,7 @@ The booking form hides the prefill section when AI is not configured.
 ```
 Client (booking-form.tsx)
   └─ fetch POST /api/ai/prefill
-       ├─ Auth check (Supabase session)
-       ├─ Rate-limit check (per user+IP)
+       ├─ Rate-limit check (per IP)
        ├─ Body-size guard
        ├─ executePrefill()  (lib/ai/prefill.ts)
        │    └─ completeJson()  (lib/ai/complete-json.ts)

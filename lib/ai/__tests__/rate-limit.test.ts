@@ -14,8 +14,8 @@ beforeEach(() => {
 
 describe("getRpmLimit / getDailyLimit", () => {
   it("returns defaults when env vars are unset", () => {
-    expect(getRpmLimit()).toBe(10);
-    expect(getDailyLimit()).toBe(100);
+    expect(getRpmLimit()).toBe(5);
+    expect(getDailyLimit()).toBe(25);
   });
 
   it("respects AI_RATE_LIMIT_RPM", () => {
@@ -30,7 +30,7 @@ describe("getRpmLimit / getDailyLimit", () => {
 
   it("falls back to default for non-numeric values", () => {
     vi.stubEnv("AI_RATE_LIMIT_RPM", "abc");
-    expect(getRpmLimit()).toBe(10);
+    expect(getRpmLimit()).toBe(5);
   });
 });
 

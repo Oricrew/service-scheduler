@@ -106,7 +106,6 @@ async function callPrefillApi(
     body: JSON.stringify({ locale, description }),
   });
 
-  if (res.status === 401) return { ok: false, error: "unauthenticated" };
   if (res.status === 429) return { ok: false, error: "rateLimited" };
   if (res.status === 413) return { ok: false, error: "tooLong" };
   if (res.status === 503) return { ok: false, error: "disabled" };

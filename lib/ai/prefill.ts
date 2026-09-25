@@ -28,7 +28,6 @@ export type PrefillErrorCode =
   | "aiError"
   | "noFields"
   | "rateLimited"
-  | "unauthenticated"
   | "disabled";
 
 export type PrefillResult =
@@ -104,8 +103,8 @@ function hasAnyField(data: PrefillData): boolean {
 
 /**
  * Core prefill logic — validates input, calls the AI provider, and
- * sanitises the result.  Auth and rate-limiting are handled by the
- * caller (the API route).
+ * sanitises the result. Rate-limiting is handled by the caller
+ * (the API route).
  */
 export async function executePrefill(
   locale: string,

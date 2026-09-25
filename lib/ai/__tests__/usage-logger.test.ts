@@ -12,7 +12,6 @@ describe("logPrefillUsage", () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     logPrefillUsage({
-      userId: "u1",
       ip: "1.2.3.4",
       durationMs: 350,
       outcome: "success",
@@ -21,7 +20,7 @@ describe("logPrefillUsage", () => {
     expect(spy).toHaveBeenCalledOnce();
     const parsed = JSON.parse(spy.mock.calls[0][0] as string);
     expect(parsed.event).toBe("ai_prefill");
-    expect(parsed.userId).toBe("u1");
+    expect(parsed.ip).toBe("1.2.3.4");
     expect(parsed.outcome).toBe("success");
     spy.mockRestore();
   });
@@ -32,7 +31,6 @@ describe("logPrefillUsage", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const entry = {
-      userId: "u1",
       ip: "1.2.3.4",
       durationMs: 100,
       outcome: "success" as const,

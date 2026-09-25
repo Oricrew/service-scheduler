@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isAiConfigured } from "@/lib/env";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
 import { logPrefillUsage } from "@/lib/ai/usage-logger";
@@ -23,18 +22,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "disabled" }, { status: 503 });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: "unauthenticated" },
-      { status: 401 },
-    );
-  }
-
   const contentLength = request.headers.get("content-length");
   if (contentLength && parseInt(contentLength, 10) > MAX_BODY_BYTES) {
     return NextResponse.json({ ok: false, error: "tooLong" }, { status: 413 });
@@ -42,8 +29,7 @@ export async function POST(request: Request) {
 
   const headersList = await headers();
   const ip = getClientIp(headersList);
-  const rateLimitKey = `${user.id}:${ip}`;
-  const rl = checkRateLimit(rateLimitKey);
+  const rl = checkRateLimit(ip);
 
   if (rl.limited) {
     return NextResponse.json(
@@ -84,7 +70,6 @@ export async function POST(request: Request) {
   const durationMs = Date.now() - start;
 
   logPrefillUsage({
-    userId: user.id,
     ip,
     durationMs,
     outcome: result.ok

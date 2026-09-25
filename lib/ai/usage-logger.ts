@@ -1,7 +1,7 @@
 /**
  * Lightweight AI-usage logger.
  *
- * Logs every prefill request (user, IP, latency, outcome) to stdout
+ * Logs every prefill request (IP, latency, outcome) to stdout
  * as structured JSON so any log aggregator can ingest it.
  *
  * When the number of requests in the trailing window exceeds a
@@ -32,7 +32,6 @@ function pruneWindow(): void {
 }
 
 export type UsageEntry = {
-  userId: string;
   ip: string;
   durationMs: number;
   outcome: "success" | "error" | "no_fields";

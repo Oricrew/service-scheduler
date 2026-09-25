@@ -1,10 +1,9 @@
 /**
- * In-memory sliding-window rate limiter keyed by an arbitrary string
- * (user ID, IP, or a composite key).
+ * In-memory sliding-window rate limiter keyed by client IP.
  *
  * Two independent limits are enforced:
- *   1. RPM  – requests per minute  (env: AI_RATE_LIMIT_RPM,  default 10)
- *   2. Daily – requests per calendar day (env: AI_RATE_LIMIT_DAILY, default 100)
+ *   1. RPM  – requests per minute  (env: AI_RATE_LIMIT_RPM,  default 5)
+ *   2. Daily – requests per 24 h rolling window (env: AI_RATE_LIMIT_DAILY, default 25)
  *
  * Suitable for a single-process deployment.  Swap for Redis / Upstash
  * when horizontal scaling is needed.
@@ -21,11 +20,11 @@ function envInt(name: string, fallback: number): number {
 }
 
 export function getRpmLimit(): number {
-  return envInt("AI_RATE_LIMIT_RPM", 10);
+  return envInt("AI_RATE_LIMIT_RPM", 5);
 }
 
 export function getDailyLimit(): number {
-  return envInt("AI_RATE_LIMIT_DAILY", 100);
+  return envInt("AI_RATE_LIMIT_DAILY", 25);
 }
 
 const buckets = new Map<string, number[]>();
