@@ -32,13 +32,9 @@ export const geminiProvider: CompletionProvider = async (
     systemInstruction: systemContent,
     generationConfig: {
       temperature: 0,
-      response_format: { type: "json_object" },
-      ...(maxTokens ? { max_tokens: maxTokens } : {}),
-      messages: [
-        { role: "system", content: systemContent },
-        { role: "user", content: prompt },
-      ],
-    }),
+      responseMimeType: "application/json",
+      ...(maxTokens ? { maxOutputTokens: maxTokens } : {}),
+    },
   });
 
   let result;
