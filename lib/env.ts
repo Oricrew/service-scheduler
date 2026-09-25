@@ -59,6 +59,20 @@ export function getAiEnv(): AiEnv {
   return { enabled, apiKey, model };
 }
 
+export type AiFallbackEnv = {
+  fallbackModel: string | undefined;
+  openaiApiKey: string | undefined;
+  openaiModel: string;
+};
+
+export function getAiFallbackEnv(): AiFallbackEnv {
+  return {
+    fallbackModel: process.env.GEMINI_FALLBACK_MODEL?.trim() || undefined,
+    openaiApiKey: process.env.OPENAI_API_KEY?.trim() || undefined,
+    openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini",
+  };
+}
+
 export function isAiConfigured(): boolean {
   const { enabled, apiKey } = getAiEnv();
   return enabled && !!apiKey;
