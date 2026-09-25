@@ -9,6 +9,8 @@ export type CompletionProvider = (
     apiKey: string;
     system?: string;
     maxTokens?: number;
+    /** Per-attempt timeout override from the fallback chain deadline budget. */
+    timeoutMs?: number;
   },
 ) => Promise<string>;
 

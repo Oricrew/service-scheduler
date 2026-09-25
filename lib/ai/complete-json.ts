@@ -1,8 +1,44 @@
+import { createHash } from "node:crypto";
 import type { z } from "zod";
 
-import { getAiEnv } from "@/lib/env";
+import { getAiEnv, getAiFallbackEnv } from "@/lib/env";
 import { geminiProvider } from "./provider";
-import type { AiResult, CompleteJsonOptions } from "./types";
+import { openaiProvider } from "./openai-provider";
+import { createFallbackProvider, type ProviderEntry } from "./fallback-chain";
+import type {
+  AiResult,
+  CompleteJsonOptions,
+  CompletionProvider,
+} from "./types";
+
+/**
+ * Cached fallback provider with the config fingerprint it was built for.
+ * Rebuilt automatically when the resolved config changes (model names,
+ * key rotation, deadline, etc.).
+ */
+let cachedEntry: { key: string; provider: CompletionProvider } | undefined;
+
+function keyPrefix(raw: string): string {
+  return createHash("sha256").update(raw).digest("hex").slice(0, 8);
+}
+
+function configKey(
+  primaryModel: string,
+  primaryApiKey: string,
+  fallbackModel: string | undefined,
+  openaiKey: string | undefined,
+  openaiModel: string,
+  totalDeadlineMs: number,
+): string {
+  return [
+    primaryModel,
+    keyPrefix(primaryApiKey),
+    fallbackModel ?? "",
+    openaiKey ? keyPrefix(openaiKey) : "",
+    openaiModel,
+    String(totalDeadlineMs),
+  ].join("|");
+}
 
 /**
  * Send a prompt to the configured AI provider and parse the response
@@ -11,6 +47,7 @@ import type { AiResult, CompleteJsonOptions } from "./types";
  * Returns `{ ok: false, error }` when:
  *  - AI is disabled via `AI_ENABLED`
  *  - `GEMINI_API_KEY` is missing
+ *  - All providers in the fallback chain fail
  *  - The provider response is not valid JSON
  *  - The JSON does not satisfy the supplied schema
  *
@@ -29,7 +66,8 @@ export async function completeJson<S extends z.ZodTypeAny>(
     return { ok: false, error: "GEMINI_API_KEY is not set" };
   }
 
-  const provider = options.provider ?? geminiProvider;
+  const provider =
+    options.provider ?? getFallbackProvider(env.apiKey, env.model);
 
   let raw: string;
   try {
@@ -61,6 +99,61 @@ export async function completeJson<S extends z.ZodTypeAny>(
   }
 
   return { ok: true, data: result.data };
+}
+
+function getFallbackProvider(
+  primaryApiKey: string,
+  primaryModel: string,
+): CompletionProvider {
+  const fallbackEnv = getAiFallbackEnv();
+  const key = configKey(
+    primaryModel,
+    primaryApiKey,
+    fallbackEnv.fallbackModel,
+    fallbackEnv.openaiApiKey,
+    fallbackEnv.openaiModel,
+    fallbackEnv.totalDeadlineMs,
+  );
+
+  if (cachedEntry && cachedEntry.key === key) return cachedEntry.provider;
+
+  const entries: ProviderEntry[] = [];
+
+  entries.push({
+    name: "gemini-primary",
+    provider: geminiProvider,
+    model: primaryModel,
+    apiKey: primaryApiKey,
+  });
+
+  if (fallbackEnv.fallbackModel) {
+    entries.push({
+      name: "gemini-fallback",
+      provider: geminiProvider,
+      model: fallbackEnv.fallbackModel,
+      apiKey: primaryApiKey,
+    });
+  }
+
+  if (fallbackEnv.openaiApiKey) {
+    entries.push({
+      name: "openai-fallback",
+      provider: openaiProvider,
+      model: fallbackEnv.openaiModel,
+      apiKey: fallbackEnv.openaiApiKey,
+    });
+  }
+
+  const provider = createFallbackProvider(entries, {
+    totalDeadlineMs: fallbackEnv.totalDeadlineMs,
+  });
+  cachedEntry = { key, provider };
+  return provider;
+}
+
+/** Visible for testing — forces the fallback chain to be rebuilt. */
+export function _resetCachedProvider(): void {
+  cachedEntry = undefined;
 }
 
 const MARKDOWN_FENCE_RE = /^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/;
