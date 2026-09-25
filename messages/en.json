@@ -284,7 +284,8 @@
         "tooLong": "The description is too long (max 500 characters).",
         "aiError": "We couldn't analyze the description. Please fill in the fields manually.",
         "noFields": "We couldn't extract any details. Try adding more information or fill in the fields manually.",
-        "rateLimited": "Too many requests. Please wait a moment and try again."
+        "rateLimited": "Too many requests. Please wait a moment and try again.",
+        "disabled": "The AI assistant is currently unavailable."
       }
     },
     "reviewNotice": "Send the request when your details are ready. A supervisor will review it before confirming the visit.",

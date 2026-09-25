@@ -4,11 +4,8 @@ import { useActionState, useCallback, useRef, useState } from "react";
 
 import { TimeSlotPicker } from "@/components/booking/time-slot-picker";
 
-import type {
-  BookingFormState,
-  PrefillErrorCode,
-  PrefillResult,
-} from "./actions";
+import type { BookingFormState } from "./actions";
+import type { PrefillErrorCode, PrefillResult } from "@/lib/ai/prefill";
 
 const initialBookingFormState: BookingFormState = {
   error: null,
@@ -96,12 +93,27 @@ type BookingFormProps = Readonly<{
   ) => Promise<BookingFormState>;
   copy: BookingFormCopy;
   aiEnabled?: boolean;
-  prefillAction?: (
-    locale: string,
-    description: string,
-  ) => Promise<PrefillResult>;
   locale?: string;
 }>;
+
+async function callPrefillApi(
+  locale: string,
+  description: string,
+): Promise<PrefillResult> {
+  const res = await fetch("/api/ai/prefill", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ locale, description }),
+  });
+
+  if (res.status === 429) return { ok: false, error: "rateLimited" };
+  if (res.status === 413) return { ok: false, error: "tooLong" };
+  if (res.status === 503) return { ok: false, error: "disabled" };
+
+  if (!res.ok) return { ok: false, error: "aiError" };
+
+  return res.json() as Promise<PrefillResult>;
+}
 
 function setNativeInputValue(
   el: HTMLInputElement | HTMLTextAreaElement | null,
@@ -122,7 +134,6 @@ export function BookingForm({
   action,
   copy,
   aiEnabled,
-  prefillAction,
   locale,
 }: BookingFormProps) {
   const [state, formAction, isPending] = useActionState(
@@ -136,16 +147,16 @@ export function BookingForm({
   const [prefillError, setPrefillError] = useState<string | null>(null);
 
   const prefillCopy = aiEnabled ? copy.prefill : undefined;
-  const showPrefill = !!prefillCopy && !!prefillAction && !!locale;
+  const showPrefill = !!prefillCopy && !!locale;
 
   const handlePrefill = useCallback(async () => {
-    if (!prefillAction || !locale || !prefillCopy) return;
+    if (!locale || !prefillCopy) return;
 
     setPrefillError(null);
     setPrefillLoading(true);
 
     try {
-      const result = await prefillAction(locale, prefillText);
+      const result = await callPrefillApi(locale, prefillText);
 
       if (!result.ok) {
         setPrefillError(prefillCopy.errors[result.error]);
@@ -204,13 +215,7 @@ export function BookingForm({
     } finally {
       setPrefillLoading(false);
     }
-  }, [
-    prefillAction,
-    locale,
-    prefillText,
-    prefillCopy,
-    copy.serviceType.options,
-  ]);
+  }, [locale, prefillText, prefillCopy, copy.serviceType.options]);
 
   return (
     <form

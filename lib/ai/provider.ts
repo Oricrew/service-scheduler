@@ -20,7 +20,7 @@ const REQUEST_TIMEOUT_MS = 20_000;
  */
 export const geminiProvider: CompletionProvider = async (
   prompt,
-  { model, apiKey, system },
+  { model, apiKey, system, maxTokens },
 ) => {
   const systemContent =
     system ??
@@ -33,6 +33,7 @@ export const geminiProvider: CompletionProvider = async (
     generationConfig: {
       temperature: 0,
       responseMimeType: "application/json",
+      ...(maxTokens ? { maxOutputTokens: maxTokens } : {}),
     },
   });
 

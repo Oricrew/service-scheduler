@@ -5,7 +5,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { isAiConfigured } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
-import { createAppointmentRequest, prefillFromDescription } from "./actions";
+import { createAppointmentRequest } from "./actions";
 import { BookingForm } from "./booking-form";
 
 type Locale = (typeof routing.locales)[number];
@@ -58,6 +58,7 @@ export default async function BookPage({
               aiError: t("prefill.errors.aiError"),
               noFields: t("prefill.errors.noFields"),
               rateLimited: t("prefill.errors.rateLimited"),
+              disabled: t("prefill.errors.disabled"),
             },
           },
         }
@@ -140,7 +141,6 @@ export default async function BookPage({
           aiEnabled={aiEnabled}
           copy={formCopy}
           locale={currentLocale}
-          prefillAction={aiEnabled ? prefillFromDescription : undefined}
         />
       </section>
     </main>
