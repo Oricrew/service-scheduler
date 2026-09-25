@@ -25,7 +25,7 @@ describe("completeJson", () => {
   describe("when AI is disabled", () => {
     it("returns a disabled error without calling the provider", async () => {
       vi.stubEnv("AI_ENABLED", "false");
-      vi.stubEnv("AI_API_KEY", "test-key");
+      vi.stubEnv("GEMINI_API_KEY", "test-key");
 
       const provider = fakeProvider("{}");
       const result = await completeJson({
@@ -43,7 +43,7 @@ describe("completeJson", () => {
 
     it("returns disabled when AI_ENABLED is not set", async () => {
       vi.stubEnv("AI_ENABLED", "");
-      vi.stubEnv("AI_API_KEY", "test-key");
+      vi.stubEnv("GEMINI_API_KEY", "test-key");
 
       const result = await completeJson({
         prompt: "test",
@@ -58,6 +58,7 @@ describe("completeJson", () => {
   describe("when API key is missing", () => {
     it("returns an error about the missing key", async () => {
       vi.stubEnv("AI_ENABLED", "true");
+      vi.stubEnv("GEMINI_API_KEY", "");
       vi.stubEnv("AI_API_KEY", "");
 
       const result = await completeJson({
@@ -68,13 +69,14 @@ describe("completeJson", () => {
 
       expect(result).toEqual({
         ok: false,
-        error: "AI_API_KEY is not set",
+        error: "GEMINI_API_KEY is not set",
       });
     });
 
     it("treats a whitespace-only API key as missing", async () => {
       vi.stubEnv("AI_ENABLED", "true");
-      vi.stubEnv("AI_API_KEY", "   ");
+      vi.stubEnv("GEMINI_API_KEY", "   ");
+      vi.stubEnv("AI_API_KEY", "");
 
       const result = await completeJson({
         prompt: "test",
@@ -84,7 +86,29 @@ describe("completeJson", () => {
 
       expect(result).toEqual({
         ok: false,
-        error: "AI_API_KEY is not set",
+        error: "GEMINI_API_KEY is not set",
+      });
+    });
+
+    it("falls back to AI_API_KEY when GEMINI_API_KEY is not set", async () => {
+      vi.stubEnv("AI_ENABLED", "true");
+      vi.stubEnv("GEMINI_API_KEY", "");
+      vi.stubEnv("AI_API_KEY", "fallback-key");
+      vi.stubEnv("AI_MODEL", "gemini-2.0-flash");
+
+      const provider = fakeProvider(
+        JSON.stringify({ title: "Test", duration: 15 }),
+      );
+
+      await completeJson({
+        prompt: "test",
+        schema: SuggestionSchema,
+        provider,
+      });
+
+      expect(provider).toHaveBeenCalledWith("test", {
+        model: "gemini-2.0-flash",
+        apiKey: "fallback-key",
       });
     });
   });
@@ -92,8 +116,8 @@ describe("completeJson", () => {
   describe("with valid configuration", () => {
     beforeEach(() => {
       vi.stubEnv("AI_ENABLED", "true");
-      vi.stubEnv("AI_API_KEY", "sk-test-key");
-      vi.stubEnv("AI_MODEL", "test-model");
+      vi.stubEnv("GEMINI_API_KEY", "test-gemini-key");
+      vi.stubEnv("GEMINI_MODEL", "gemini-2.0-flash");
     });
 
     it("parses valid JSON matching the schema", async () => {
@@ -176,8 +200,8 @@ describe("completeJson", () => {
       });
 
       expect(provider).toHaveBeenCalledWith("test prompt", {
-        model: "test-model",
-        apiKey: "sk-test-key",
+        model: "gemini-2.0-flash",
+        apiKey: "test-gemini-key",
       });
     });
 
