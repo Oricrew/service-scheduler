@@ -61,10 +61,12 @@ export const openaiProvider: CompletionProvider = async (
     if (isAbortError(err)) {
       throw new AiProviderError("AI provider request timed out", {
         transient: true,
+        kind: "timeout",
       });
     }
     throw new AiProviderError("AI provider request failed", {
       transient: true,
+      kind: "network",
     });
   }
 
@@ -75,6 +77,7 @@ export const openaiProvider: CompletionProvider = async (
     throw new AiProviderError(`AI provider returned HTTP ${res.status}`, {
       transient,
       statusCode: res.status,
+      kind: "http",
     });
   }
 
@@ -84,6 +87,7 @@ export const openaiProvider: CompletionProvider = async (
   } catch {
     throw new AiProviderError("AI provider returned invalid JSON body", {
       transient: false,
+      kind: "empty",
     });
   }
 
@@ -91,6 +95,7 @@ export const openaiProvider: CompletionProvider = async (
   if (!parsed.success) {
     throw new AiProviderError("AI provider returned an unexpected body shape", {
       transient: false,
+      kind: "empty",
     });
   }
 
@@ -98,6 +103,7 @@ export const openaiProvider: CompletionProvider = async (
   if (!content || content.trim().length === 0) {
     throw new AiProviderError("AI provider returned an empty response", {
       transient: false,
+      kind: "empty",
     });
   }
 

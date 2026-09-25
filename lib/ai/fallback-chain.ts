@@ -12,13 +12,15 @@ export interface ProviderEntry {
 
 export interface FallbackChainOptions {
   maxRetries?: number;
-  /** Hard deadline across the entire chain in ms (default: env or 15 000). */
+  /** Hard deadline across the entire chain in ms. */
   totalDeadlineMs?: number;
+  /** Per-attempt timeout cap in ms (default 8 000). */
+  perAttemptMs?: number;
   circuitBreakerThreshold?: number;
   circuitBreakerResetMs?: number;
   /** Injected for testing — forwarded to withRetry. */
   sleep?: (ms: number) => Promise<void>;
-  /** Injected for testing — forwarded to CircuitBreaker. */
+  /** Injected for testing — forwarded to CircuitBreaker and deadline logic. */
   now?: () => number;
 }
 
@@ -71,15 +73,7 @@ function shouldTripBreaker(err: unknown): boolean {
 }
 
 const DEFAULT_TOTAL_DEADLINE_MS = 15_000;
-
-function getTotalDeadlineMs(): number {
-  const raw = process.env.AI_TOTAL_DEADLINE_MS;
-  if (!raw) return DEFAULT_TOTAL_DEADLINE_MS;
-  const parsed = parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed > 0
-    ? parsed
-    : DEFAULT_TOTAL_DEADLINE_MS;
-}
+const DEFAULT_PER_ATTEMPT_MS = 8_000;
 
 /**
  * Build a {@link CompletionProvider} that walks through `entries` in
@@ -88,11 +82,15 @@ function getTotalDeadlineMs(): number {
  *
  * Timeout errors are never retried on the same entry — they immediately
  * advance to the next provider.  An overall deadline caps worst-case
- * latency across the whole chain.
+ * latency across the whole chain.  Each individual attempt is capped
+ * at min(perAttemptMs, remaining deadline) so a hung primary leaves
+ * time for the fallbacks.
  *
  * Each entry has its own circuit breaker (keyed by `name:model`) —
  * after N consecutive *transient* failures the entry is skipped until
- * the cooldown expires.
+ * the cooldown expires.  Non-transient errors (safety blocks, 4xx)
+ * prove reachability and release the half-open probe slot without
+ * tripping the breaker.
  */
 export function createFallbackProvider(
   entries: ProviderEntry[],
@@ -102,13 +100,15 @@ export function createFallbackProvider(
     return async () => {
       throw new AiProviderError("No AI providers configured", {
         transient: false,
+        kind: "unknown",
       });
     };
   }
 
   const threshold = opts.circuitBreakerThreshold ?? 5;
   const resetMs = opts.circuitBreakerResetMs ?? 30_000;
-  const totalDeadline = opts.totalDeadlineMs ?? getTotalDeadlineMs();
+  const totalDeadline = opts.totalDeadlineMs ?? DEFAULT_TOTAL_DEADLINE_MS;
+  const perAttemptCap = opts.perAttemptMs ?? DEFAULT_PER_ATTEMPT_MS;
   const nowFn = opts.now ?? Date.now;
 
   const breakers = entries.map((e) =>
@@ -122,21 +122,25 @@ export function createFallbackProvider(
 
   return async (prompt, callerOpts) => {
     const chainStart = nowFn();
+    const deadlineTs = chainStart + totalDeadline;
     let lastError: unknown;
 
     for (let i = 0; i < entries.length; i++) {
-      const elapsed = nowFn() - chainStart;
-      const remaining = totalDeadline - elapsed;
+      const remaining = deadlineTs - nowFn();
       if (remaining <= 0) break;
 
       const entry = entries[i];
       const breaker = breakers[i];
       if (breaker.isOpen) continue;
 
+      const attemptTimeout = Math.min(perAttemptCap, remaining);
+
       const retryOpts: RetryOptions = {
         maxRetries: opts.maxRetries ?? 2,
         sleep: opts.sleep,
         skipTimeouts: true,
+        deadlineTs,
+        now: nowFn,
       };
 
       try {
@@ -147,7 +151,7 @@ export function createFallbackProvider(
               apiKey: entry.apiKey,
               system: callerOpts.system,
               maxTokens: callerOpts.maxTokens,
-              timeoutMs: remaining,
+              timeoutMs: attemptTimeout,
             }),
           retryOpts,
         );
@@ -156,6 +160,10 @@ export function createFallbackProvider(
       } catch (err) {
         if (shouldTripBreaker(err)) {
           breaker.recordFailure();
+        } else {
+          // Non-transient errors (safety block, 4xx, plain Error) prove
+          // the provider is reachable — release the half-open probe slot.
+          breaker.recordSuccess();
         }
         lastError = err;
       }
@@ -164,6 +172,7 @@ export function createFallbackProvider(
     if (lastError) throw lastError;
     throw new AiProviderError("All AI providers are circuit-broken", {
       transient: true,
+      kind: "unknown",
     });
   };
 }

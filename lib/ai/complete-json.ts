@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { z } from "zod";
 
 import { getAiEnv, getAiFallbackEnv } from "@/lib/env";
@@ -12,22 +13,30 @@ import type {
 
 /**
  * Cached fallback provider with the config fingerprint it was built for.
- * Rebuilt automatically when the resolved config changes (e.g. env var
- * update, different model, key rotation).
+ * Rebuilt automatically when the resolved config changes (model names,
+ * key rotation, deadline, etc.).
  */
 let cachedEntry: { key: string; provider: CompletionProvider } | undefined;
+
+function keyPrefix(raw: string): string {
+  return createHash("sha256").update(raw).digest("hex").slice(0, 8);
+}
 
 function configKey(
   primaryModel: string,
   primaryApiKey: string,
   fallbackModel: string | undefined,
   openaiKey: string | undefined,
+  openaiModel: string,
+  totalDeadlineMs: number,
 ): string {
   return [
     primaryModel,
-    primaryApiKey ? "k" : "",
+    keyPrefix(primaryApiKey),
     fallbackModel ?? "",
-    openaiKey ? "o" : "",
+    openaiKey ? keyPrefix(openaiKey) : "",
+    openaiModel,
+    String(totalDeadlineMs),
   ].join("|");
 }
 
@@ -102,6 +111,8 @@ function getFallbackProvider(
     primaryApiKey,
     fallbackEnv.fallbackModel,
     fallbackEnv.openaiApiKey,
+    fallbackEnv.openaiModel,
+    fallbackEnv.totalDeadlineMs,
   );
 
   if (cachedEntry && cachedEntry.key === key) return cachedEntry.provider;
@@ -133,7 +144,9 @@ function getFallbackProvider(
     });
   }
 
-  const provider = createFallbackProvider(entries);
+  const provider = createFallbackProvider(entries, {
+    totalDeadlineMs: fallbackEnv.totalDeadlineMs,
+  });
   cachedEntry = { key, provider };
   return provider;
 }

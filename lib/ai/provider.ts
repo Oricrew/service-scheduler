@@ -56,12 +56,14 @@ export const geminiProvider: CompletionProvider = async (
   } catch {
     throw new AiProviderError("AI provider response was blocked or empty", {
       transient: false,
+      kind: "blocked",
     });
   }
 
   if (typeof content !== "string" || content.trim().length === 0) {
     throw new AiProviderError("AI provider returned an empty response", {
       transient: false,
+      kind: "empty",
     });
   }
 
@@ -72,6 +74,7 @@ function classifyGeminiError(err: unknown): AiProviderError {
   if (err instanceof GoogleGenerativeAIAbortError) {
     return new AiProviderError("AI provider request timed out", {
       transient: true,
+      kind: "timeout",
     });
   }
 
@@ -80,16 +83,19 @@ function classifyGeminiError(err: unknown): AiProviderError {
     return new AiProviderError(`AI provider returned HTTP ${status}`, {
       transient: isTransientStatus(status),
       statusCode: status,
+      kind: "http",
     });
   }
 
   if (err instanceof GoogleGenerativeAIResponseError) {
     return new AiProviderError("AI provider response was blocked or empty", {
       transient: false,
+      kind: "blocked",
     });
   }
 
   return new AiProviderError("AI provider request failed", {
     transient: true,
+    kind: "network",
   });
 }

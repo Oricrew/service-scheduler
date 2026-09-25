@@ -20,27 +20,30 @@ function mockProvider(result: string): CompletionProvider {
   return vi.fn().mockResolvedValue(result);
 }
 
-function failingProvider(err: AiProviderError): CompletionProvider {
+function failingProvider(err: Error): CompletionProvider {
   return vi.fn().mockRejectedValue(err);
 }
 
 const transientErr = new AiProviderError("service unavailable", {
   transient: true,
   statusCode: 503,
+  kind: "http",
 });
 
 const permanentErr = new AiProviderError("bad request", {
   transient: false,
   statusCode: 400,
+  kind: "http",
 });
 
 const timeoutErr = new AiProviderError("AI provider request timed out", {
   transient: true,
+  kind: "timeout",
 });
 
 const safetyBlockErr = new AiProviderError(
   "AI provider response was blocked or empty",
-  { transient: false },
+  { transient: false, kind: "blocked" },
 );
 
 beforeEach(() => {
@@ -147,7 +150,7 @@ describe("createFallbackProvider", () => {
     );
   });
 
-  it("passes entry-specific model, apiKey, maxTokens, and timeoutMs", async () => {
+  it("passes entry-specific model, apiKey, maxTokens, and capped timeoutMs", async () => {
     const now = 0;
     const primary = vi.fn().mockResolvedValue("ok");
     const entries: ProviderEntry[] = [
@@ -162,6 +165,7 @@ describe("createFallbackProvider", () => {
     const provider = createFallbackProvider(entries, {
       sleep: noopSleep,
       totalDeadlineMs: 15_000,
+      perAttemptMs: 8_000,
       now: () => now,
     });
     await provider("prompt", {
@@ -176,7 +180,7 @@ describe("createFallbackProvider", () => {
       apiKey: "entry-key",
       system: "sys",
       maxTokens: 512,
-      timeoutMs: 15_000,
+      timeoutMs: 8_000,
     });
   });
 
@@ -356,9 +360,6 @@ describe("createFallbackProvider", () => {
 
     it("worst-case latency is bounded by deadline", async () => {
       let now = 0;
-      // Simulate a provider that always times out after consuming its
-      // full timeoutMs budget.  With skipTimeouts the chain never retries
-      // a timeout, so each entry consumes at most the remaining budget.
       const slow: CompletionProvider = vi
         .fn()
         .mockImplementation(
@@ -387,7 +388,7 @@ describe("createFallbackProvider", () => {
       expect(elapsed).toBeLessThanOrEqual(15_000);
     });
 
-    it("passes remaining budget as timeoutMs to each attempt", async () => {
+    it("passes remaining budget as timeoutMs capped by perAttemptMs", async () => {
       let now = 0;
       const primary: CompletionProvider = vi
         .fn()
@@ -406,6 +407,7 @@ describe("createFallbackProvider", () => {
         maxRetries: 0,
         sleep: noopSleep,
         totalDeadlineMs: 10_000,
+        perAttemptMs: 8_000,
         now: () => now,
       });
 
@@ -414,6 +416,43 @@ describe("createFallbackProvider", () => {
       const secondaryCall = (secondary as ReturnType<typeof vi.fn>).mock
         .calls[0] as [string, { timeoutMs: number }];
       expect(secondaryCall[1].timeoutMs).toBe(5000);
+    });
+
+    it("primary hangs but fallback still succeeds within deadline", async () => {
+      let now = 0;
+      const hanging: CompletionProvider = vi
+        .fn()
+        .mockImplementation(
+          async (_p: string, opts: { timeoutMs?: number }) => {
+            now += opts.timeoutMs ?? 8_000;
+            throw timeoutErr;
+          },
+        );
+      const fallback = vi.fn().mockImplementation(async () => {
+        now += 500;
+        return "fallback-ok";
+      });
+
+      const entries: ProviderEntry[] = [
+        { name: "hang-p", provider: hanging, model: "m1", apiKey: "k1" },
+        { name: "hang-f", provider: fallback, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        sleep: noopSleep,
+        totalDeadlineMs: 15_000,
+        perAttemptMs: 8_000,
+        now: () => now,
+      });
+
+      const startNow = now;
+      const result = await provider("prompt", callOpts);
+      const elapsed = now - startNow;
+
+      expect(result).toBe("fallback-ok");
+      expect(elapsed).toBeLessThanOrEqual(15_000);
+      expect(elapsed).toBe(8_500);
     });
   });
 
@@ -485,7 +524,6 @@ describe("createFallbackProvider", () => {
       await provider("b", callOpts);
       await provider("c", callOpts);
 
-      // Primary was still called every time — not circuit-broken
       expect(primary).toHaveBeenCalledTimes(3);
     });
 
@@ -493,6 +531,7 @@ describe("createFallbackProvider", () => {
       const http400Err = new AiProviderError("AI provider returned HTTP 400", {
         transient: false,
         statusCode: 400,
+        kind: "http",
       });
       const now = 0;
       const primary = failingProvider(http400Err);
@@ -515,6 +554,146 @@ describe("createFallbackProvider", () => {
       await provider("c", callOpts);
 
       expect(primary).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("half-open probe slot release", () => {
+    it("releases half-open slot when probe fails with non-transient 400", async () => {
+      let now = 0;
+      const primaryFn = vi
+        .fn()
+        .mockRejectedValueOnce(transientErr)
+        .mockRejectedValueOnce(transientErr)
+        // Probe attempt: non-transient 400
+        .mockRejectedValueOnce(permanentErr)
+        // Next call after probe closed the breaker
+        .mockResolvedValue("primary-ok");
+
+      const entries: ProviderEntry[] = [
+        { name: "ho400-p", provider: primaryFn, model: "m1", apiKey: "k1" },
+        {
+          name: "ho400-s",
+          provider: mockProvider("secondary-ok"),
+          model: "m2",
+          apiKey: "k2",
+        },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        circuitBreakerThreshold: 2,
+        circuitBreakerResetMs: 1000,
+        sleep: noopSleep,
+        now: () => now,
+        totalDeadlineMs: 15_000,
+      });
+
+      // Trip the breaker with 2 transient failures
+      await provider("a", callOpts);
+      await provider("b", callOpts);
+
+      // After cooldown, probe with a 400 — non-transient, but proves reachability
+      now = 1000;
+      const r1 = await provider("c", callOpts);
+      // Falls back to secondary for this request (probe errored)
+      expect(r1).toBe("secondary-ok");
+
+      // Breaker should be closed now (recordSuccess on non-transient)
+      // so next call tries primary again
+      const r2 = await provider("d", callOpts);
+      expect(r2).toBe("primary-ok");
+    });
+
+    it("releases half-open slot when probe fails with a plain Error", async () => {
+      let now = 0;
+      const plainError = new Error("unexpected");
+      const primaryFn = vi
+        .fn()
+        .mockRejectedValueOnce(transientErr)
+        .mockRejectedValueOnce(transientErr)
+        // Probe: plain Error (not AiProviderError)
+        .mockRejectedValueOnce(plainError)
+        // Next call after probe closed breaker
+        .mockResolvedValue("primary-ok");
+
+      const entries: ProviderEntry[] = [
+        {
+          name: "hoplain-p",
+          provider: primaryFn,
+          model: "m1",
+          apiKey: "k1",
+        },
+        {
+          name: "hoplain-s",
+          provider: mockProvider("secondary-ok"),
+          model: "m2",
+          apiKey: "k2",
+        },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        circuitBreakerThreshold: 2,
+        circuitBreakerResetMs: 1000,
+        sleep: noopSleep,
+        now: () => now,
+        totalDeadlineMs: 15_000,
+      });
+
+      await provider("a", callOpts);
+      await provider("b", callOpts);
+
+      now = 1000;
+      const r1 = await provider("c", callOpts);
+      expect(r1).toBe("secondary-ok");
+
+      // Breaker closed: primary is available again
+      const r2 = await provider("d", callOpts);
+      expect(r2).toBe("primary-ok");
+    });
+
+    it("transient probe failure reopens the breaker", async () => {
+      let now = 0;
+      const primaryFn = vi.fn().mockRejectedValue(transientErr);
+
+      const entries: ProviderEntry[] = [
+        {
+          name: "hotrans-p",
+          provider: primaryFn,
+          model: "m1",
+          apiKey: "k1",
+        },
+        {
+          name: "hotrans-s",
+          provider: mockProvider("secondary-ok"),
+          model: "m2",
+          apiKey: "k2",
+        },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        circuitBreakerThreshold: 2,
+        circuitBreakerResetMs: 1000,
+        sleep: noopSleep,
+        now: () => now,
+        totalDeadlineMs: 15_000,
+      });
+
+      // Trip breaker
+      await provider("a", callOpts);
+      await provider("b", callOpts);
+
+      // Probe after cooldown — transient failure reopens
+      now = 1000;
+      primaryFn.mockClear();
+      await provider("c", callOpts);
+      expect(primaryFn).toHaveBeenCalledTimes(1);
+
+      // Still open — primary skipped
+      primaryFn.mockClear();
+      await provider("d", callOpts);
+      expect(primaryFn).not.toHaveBeenCalled();
     });
   });
 });

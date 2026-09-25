@@ -20,6 +20,7 @@ describe("withRetry", () => {
     const transient = new AiProviderError("rate limited", {
       transient: true,
       statusCode: 429,
+      kind: "http",
     });
     const fn = vi.fn().mockRejectedValue(transient);
 
@@ -35,6 +36,7 @@ describe("withRetry", () => {
     const permanent = new AiProviderError("bad request", {
       transient: false,
       statusCode: 400,
+      kind: "http",
     });
     const fn = vi.fn().mockRejectedValue(permanent);
 
@@ -58,7 +60,10 @@ describe("withRetry", () => {
   });
 
   it("succeeds after transient failures followed by success", async () => {
-    const transient = new AiProviderError("timeout", { transient: true });
+    const transient = new AiProviderError("server error", {
+      transient: true,
+      kind: "http",
+    });
     const fn = vi
       .fn()
       .mockRejectedValueOnce(transient)
@@ -72,7 +77,10 @@ describe("withRetry", () => {
   });
 
   it("applies exponential backoff with jitter", async () => {
-    const transient = new AiProviderError("timeout", { transient: true });
+    const transient = new AiProviderError("server error", {
+      transient: true,
+      kind: "http",
+    });
     const fn = vi.fn().mockRejectedValue(transient);
     const sleepSpy = vi.fn().mockResolvedValue(undefined);
 
@@ -95,7 +103,10 @@ describe("withRetry", () => {
   });
 
   it("caps delay at maxDelayMs", async () => {
-    const transient = new AiProviderError("timeout", { transient: true });
+    const transient = new AiProviderError("server error", {
+      transient: true,
+      kind: "http",
+    });
     const fn = vi.fn().mockRejectedValue(transient);
     const sleepSpy = vi.fn().mockResolvedValue(undefined);
 
@@ -116,6 +127,7 @@ describe("withRetry", () => {
   it("does not retry timeouts when skipTimeouts is true", async () => {
     const timeoutErr = new AiProviderError("AI provider request timed out", {
       transient: true,
+      kind: "timeout",
     });
     const fn = vi.fn().mockRejectedValue(timeoutErr);
 
@@ -130,6 +142,7 @@ describe("withRetry", () => {
     const transient = new AiProviderError("rate limited", {
       transient: true,
       statusCode: 429,
+      kind: "http",
     });
     const fn = vi.fn().mockRejectedValue(transient);
 
@@ -138,5 +151,58 @@ describe("withRetry", () => {
     ).rejects.toThrow("rate limited");
 
     expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it("stops retrying when deadline is exceeded", async () => {
+    let now = 0;
+    const transient = new AiProviderError("server error", {
+      transient: true,
+      kind: "http",
+    });
+    const fn = vi.fn().mockImplementation(async () => {
+      now += 3000;
+      throw transient;
+    });
+    const sleepSpy = vi.fn().mockImplementation(async (ms: number) => {
+      now += ms;
+    });
+
+    await expect(
+      withRetry(fn, {
+        maxRetries: 10,
+        sleep: sleepSpy,
+        deadlineTs: 5000,
+        now: () => now,
+      }),
+    ).rejects.toThrow("server error");
+
+    expect(fn.mock.calls.length).toBeLessThanOrEqual(3);
+  });
+
+  it("clamps backoff sleep to remaining deadline", async () => {
+    let now = 0;
+    const transient = new AiProviderError("server error", {
+      transient: true,
+      kind: "http",
+    });
+    const fn = vi.fn().mockRejectedValue(transient);
+    const sleepSpy = vi.fn().mockImplementation(async (ms: number) => {
+      now += ms;
+    });
+
+    await expect(
+      withRetry(fn, {
+        maxRetries: 5,
+        baseDelayMs: 10_000,
+        maxDelayMs: 10_000,
+        sleep: sleepSpy,
+        deadlineTs: 3000,
+        now: () => now,
+      }),
+    ).rejects.toThrow();
+
+    for (const [ms] of sleepSpy.mock.calls as [number][]) {
+      expect(ms).toBeLessThanOrEqual(3000);
+    }
   });
 });
