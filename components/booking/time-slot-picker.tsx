@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { Input, Label } from "@/components/ui";
+
 type TimeSlotPickerProps = Readonly<{
   label: string;
   description: string;
@@ -53,19 +55,18 @@ export function TimeSlotPicker({
 
   return (
     <fieldset className="mb-8">
-      <legend className="text-sm font-bold text-slate-800">
+      <legend className="text-sm font-bold text-foreground/90">
         {label}
-        <span className="ml-1 text-sky-700">{requiredLabel}</span>
+        <span className="ml-1 text-primary">{requiredLabel}</span>
       </legend>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+      <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
 
-      <label className="mt-4 grid gap-2">
-        <span className="text-sm font-bold text-slate-800">
+      <div className="mt-4 grid gap-2">
+        <Label htmlFor="requestedDate" required requiredText={requiredLabel}>
           {dateLabel}
-          <span className="ml-1 text-sky-700">{requiredLabel}</span>
-        </span>
-        <input
-          className="rounded-2xl border border-slate-200 px-4 py-3 text-base outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+        </Label>
+        <Input
+          id="requestedDate"
           name="requestedDate"
           onChange={(event) => {
             setDate(event.target.value);
@@ -75,12 +76,12 @@ export function TimeSlotPicker({
           type="date"
           value={date}
         />
-      </label>
+      </div>
 
       <div className="mt-5">
-        <p className="text-sm font-bold text-slate-800">
+        <p className="text-sm font-bold text-foreground/90">
           {slotLabel}
-          <span className="ml-1 text-sky-700">{requiredLabel}</span>
+          <span className="ml-1 text-primary">{requiredLabel}</span>
         </p>
 
         {slots.length > 0 ? (
@@ -90,8 +91,8 @@ export function TimeSlotPicker({
                 className={[
                   "cursor-pointer rounded-2xl border px-4 py-3 text-center text-sm font-black transition",
                   selectedSlot === slot
-                    ? "border-sky-700 bg-sky-50 text-sky-900 ring-4 ring-sky-100"
-                    : "border-slate-200 text-slate-900 hover:border-sky-300 hover:bg-sky-50/50",
+                    ? "border-primary bg-primary-light text-foreground ring-4 ring-ring-focus"
+                    : "border-border hover:border-primary hover:bg-primary-light",
                 ].join(" ")}
                 key={slot}
               >
@@ -111,13 +112,13 @@ export function TimeSlotPicker({
             ))}
           </div>
         ) : (
-          <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+          <p className="mt-3 rounded-2xl bg-surface p-4 text-sm leading-6 text-muted">
             {noSlotsLabel}
           </p>
         )}
       </div>
 
-      <p className="mt-4 text-sm leading-6 text-slate-500">{helperText}</p>
+      <p className="mt-4 text-sm leading-6 text-muted">{helperText}</p>
     </fieldset>
   );
 }

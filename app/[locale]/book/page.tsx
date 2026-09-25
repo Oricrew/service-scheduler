@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { CardHeader } from "@/components/ui";
 import { isAiConfigured } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
@@ -112,7 +113,7 @@ export default async function BookPage({
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="min-h-screen bg-surface text-foreground">
       <header className="mx-auto flex w-full max-w-4xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
         <Link
           className="text-base font-black tracking-tight sm:text-lg"
@@ -125,15 +126,12 @@ export default async function BookPage({
 
       <section className="mx-auto w-full max-w-4xl px-5 pb-16 pt-8 sm:px-8 sm:pt-12">
         <div className="max-w-2xl">
-          <p className="mb-4 text-sm font-black uppercase tracking-[0.22em] text-sky-700">
-            {t("eyebrow")}
-          </p>
-          <h1 className="text-4xl font-black leading-none tracking-tight sm:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-slate-600">
-            {t("description")}
-          </p>
+          <CardHeader
+            description={t("description")}
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            titleAs="h1"
+          />
         </div>
 
         <BookingForm
