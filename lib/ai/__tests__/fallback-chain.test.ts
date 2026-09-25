@@ -34,8 +34,18 @@ const permanentErr = new AiProviderError("bad request", {
   statusCode: 400,
 });
 
+const timeoutErr = new AiProviderError("AI provider request timed out", {
+  transient: true,
+});
+
+const safetyBlockErr = new AiProviderError(
+  "AI provider response was blocked or empty",
+  { transient: false },
+);
+
 beforeEach(() => {
   _resetBreakers();
+  vi.unstubAllEnvs();
 });
 
 describe("createFallbackProvider", () => {
@@ -47,7 +57,10 @@ describe("createFallbackProvider", () => {
       { name: "s", provider: secondary, model: "m2", apiKey: "k2" },
     ];
 
-    const provider = createFallbackProvider(entries, { sleep: noopSleep });
+    const provider = createFallbackProvider(entries, {
+      sleep: noopSleep,
+      totalDeadlineMs: 15_000,
+    });
     const result = await provider("prompt", callOpts);
 
     expect(result).toBe("primary-ok");
@@ -66,6 +79,7 @@ describe("createFallbackProvider", () => {
     const provider = createFallbackProvider(entries, {
       maxRetries: 0,
       sleep: noopSleep,
+      totalDeadlineMs: 15_000,
     });
     const result = await provider("prompt", callOpts);
 
@@ -83,6 +97,7 @@ describe("createFallbackProvider", () => {
     const provider = createFallbackProvider(entries, {
       maxRetries: 0,
       sleep: noopSleep,
+      totalDeadlineMs: 15_000,
     });
     const result = await provider("prompt", callOpts);
 
@@ -100,6 +115,7 @@ describe("createFallbackProvider", () => {
     const provider = createFallbackProvider(entries, {
       maxRetries: 2,
       sleep: noopSleep,
+      totalDeadlineMs: 15_000,
     });
     const result = await provider("prompt", callOpts);
 
@@ -118,6 +134,7 @@ describe("createFallbackProvider", () => {
     const provider = createFallbackProvider(entries, {
       maxRetries: 0,
       sleep: noopSleep,
+      totalDeadlineMs: 15_000,
     });
 
     await expect(provider("prompt", callOpts)).rejects.toThrow("bad request");
@@ -130,7 +147,8 @@ describe("createFallbackProvider", () => {
     );
   });
 
-  it("passes entry-specific model, apiKey, and maxTokens", async () => {
+  it("passes entry-specific model, apiKey, maxTokens, and timeoutMs", async () => {
+    const now = 0;
     const primary = vi.fn().mockResolvedValue("ok");
     const entries: ProviderEntry[] = [
       {
@@ -141,7 +159,11 @@ describe("createFallbackProvider", () => {
       },
     ];
 
-    const provider = createFallbackProvider(entries, { sleep: noopSleep });
+    const provider = createFallbackProvider(entries, {
+      sleep: noopSleep,
+      totalDeadlineMs: 15_000,
+      now: () => now,
+    });
     await provider("prompt", {
       model: "caller-model",
       apiKey: "caller-key",
@@ -154,6 +176,7 @@ describe("createFallbackProvider", () => {
       apiKey: "entry-key",
       system: "sys",
       maxTokens: 512,
+      timeoutMs: 15_000,
     });
   });
 
@@ -172,6 +195,7 @@ describe("createFallbackProvider", () => {
       circuitBreakerResetMs: 10_000,
       sleep: noopSleep,
       now: () => now,
+      totalDeadlineMs: 15_000,
     });
 
     await provider("prompt1", callOpts);
@@ -210,6 +234,7 @@ describe("createFallbackProvider", () => {
       circuitBreakerResetMs: 5000,
       sleep: noopSleep,
       now: () => now,
+      totalDeadlineMs: 15_000,
     });
 
     await provider("p1", callOpts);
@@ -254,6 +279,7 @@ describe("createFallbackProvider", () => {
     const provider = createFallbackProvider(entries, {
       maxRetries: 0,
       sleep: noopSleep,
+      totalDeadlineMs: 15_000,
     });
     const result = await provider("prompt", callOpts);
 
@@ -268,7 +294,12 @@ describe("createFallbackProvider", () => {
     const makeProvider = () =>
       createFallbackProvider(
         [
-          { name: "persist-p", provider: primary, model: "m1", apiKey: "k1" },
+          {
+            name: "persist-p",
+            provider: primary,
+            model: "m1",
+            apiKey: "k1",
+          },
           {
             name: "persist-s",
             provider: secondary,
@@ -280,6 +311,7 @@ describe("createFallbackProvider", () => {
           maxRetries: 0,
           circuitBreakerThreshold: 2,
           sleep: noopSleep,
+          totalDeadlineMs: 15_000,
         },
       );
 
@@ -293,5 +325,196 @@ describe("createFallbackProvider", () => {
 
     expect(result).toBe("secondary-ok");
     expect(primary).not.toHaveBeenCalled();
+  });
+
+  describe("overall deadline", () => {
+    it("stops the chain when deadline is exhausted", async () => {
+      let now = 0;
+      const slow: CompletionProvider = vi.fn().mockImplementation(async () => {
+        now += 10_000;
+        throw transientErr;
+      });
+      const secondary = mockProvider("secondary-ok");
+
+      const entries: ProviderEntry[] = [
+        { name: "slow-p", provider: slow, model: "m1", apiKey: "k1" },
+        { name: "dl-s", provider: secondary, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        sleep: noopSleep,
+        totalDeadlineMs: 8_000,
+        now: () => now,
+      });
+
+      await expect(provider("prompt", callOpts)).rejects.toThrow(
+        "service unavailable",
+      );
+      expect(secondary).not.toHaveBeenCalled();
+    });
+
+    it("worst-case latency is bounded by deadline", async () => {
+      let now = 0;
+      // Simulate a provider that always times out after consuming its
+      // full timeoutMs budget.  With skipTimeouts the chain never retries
+      // a timeout, so each entry consumes at most the remaining budget.
+      const slow: CompletionProvider = vi
+        .fn()
+        .mockImplementation(
+          async (_p: string, opts: { timeoutMs?: number }) => {
+            now += opts.timeoutMs ?? 5000;
+            throw timeoutErr;
+          },
+        );
+
+      const entries: ProviderEntry[] = [
+        { name: "wc-a", provider: slow, model: "m1", apiKey: "k1" },
+        { name: "wc-b", provider: slow, model: "m2", apiKey: "k2" },
+        { name: "wc-c", provider: slow, model: "m3", apiKey: "k3" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 2,
+        sleep: noopSleep,
+        totalDeadlineMs: 15_000,
+        now: () => now,
+      });
+
+      const startNow = now;
+      await expect(provider("prompt", callOpts)).rejects.toThrow();
+      const elapsed = now - startNow;
+      expect(elapsed).toBeLessThanOrEqual(15_000);
+    });
+
+    it("passes remaining budget as timeoutMs to each attempt", async () => {
+      let now = 0;
+      const primary: CompletionProvider = vi
+        .fn()
+        .mockImplementation(async () => {
+          now += 5000;
+          throw transientErr;
+        });
+      const secondary = vi.fn().mockResolvedValue("ok");
+
+      const entries: ProviderEntry[] = [
+        { name: "bud-p", provider: primary, model: "m1", apiKey: "k1" },
+        { name: "bud-s", provider: secondary, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        sleep: noopSleep,
+        totalDeadlineMs: 10_000,
+        now: () => now,
+      });
+
+      await provider("prompt", callOpts);
+
+      const secondaryCall = (secondary as ReturnType<typeof vi.fn>).mock
+        .calls[0] as [string, { timeoutMs: number }];
+      expect(secondaryCall[1].timeoutMs).toBe(5000);
+    });
+  });
+
+  describe("timeout handling", () => {
+    it("does not retry timeouts — moves to next provider immediately", async () => {
+      const primary = failingProvider(timeoutErr);
+      const secondary = mockProvider("secondary-ok");
+      const entries: ProviderEntry[] = [
+        { name: "to-p", provider: primary, model: "m1", apiKey: "k1" },
+        { name: "to-s", provider: secondary, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 2,
+        sleep: noopSleep,
+        totalDeadlineMs: 15_000,
+      });
+      const result = await provider("prompt", callOpts);
+
+      expect(result).toBe("secondary-ok");
+      expect(primary).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("breaker trip classification", () => {
+    it("transient errors (5xx) trip the circuit breaker", async () => {
+      const now = 0;
+      const primary = failingProvider(transientErr);
+      const secondary = mockProvider("secondary-ok");
+      const entries: ProviderEntry[] = [
+        { name: "trip-p", provider: primary, model: "m1", apiKey: "k1" },
+        { name: "trip-s", provider: secondary, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        circuitBreakerThreshold: 2,
+        sleep: noopSleep,
+        now: () => now,
+        totalDeadlineMs: 15_000,
+      });
+
+      await provider("a", callOpts);
+      await provider("b", callOpts);
+
+      (primary as ReturnType<typeof vi.fn>).mockClear();
+      await provider("c", callOpts);
+      expect(primary).not.toHaveBeenCalled();
+    });
+
+    it("safety blocks (non-transient) do NOT trip the circuit breaker", async () => {
+      const now = 0;
+      const primary = failingProvider(safetyBlockErr);
+      const secondary = mockProvider("secondary-ok");
+      const entries: ProviderEntry[] = [
+        { name: "safe-p", provider: primary, model: "m1", apiKey: "k1" },
+        { name: "safe-s", provider: secondary, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        circuitBreakerThreshold: 2,
+        sleep: noopSleep,
+        now: () => now,
+        totalDeadlineMs: 15_000,
+      });
+
+      await provider("a", callOpts);
+      await provider("b", callOpts);
+      await provider("c", callOpts);
+
+      // Primary was still called every time — not circuit-broken
+      expect(primary).toHaveBeenCalledTimes(3);
+    });
+
+    it("4xx errors do NOT trip the circuit breaker", async () => {
+      const http400Err = new AiProviderError("AI provider returned HTTP 400", {
+        transient: false,
+        statusCode: 400,
+      });
+      const now = 0;
+      const primary = failingProvider(http400Err);
+      const secondary = mockProvider("secondary-ok");
+      const entries: ProviderEntry[] = [
+        { name: "4xx-p", provider: primary, model: "m1", apiKey: "k1" },
+        { name: "4xx-s", provider: secondary, model: "m2", apiKey: "k2" },
+      ];
+
+      const provider = createFallbackProvider(entries, {
+        maxRetries: 0,
+        circuitBreakerThreshold: 2,
+        sleep: noopSleep,
+        now: () => now,
+        totalDeadlineMs: 15_000,
+      });
+
+      await provider("a", callOpts);
+      await provider("b", callOpts);
+      await provider("c", callOpts);
+
+      expect(primary).toHaveBeenCalledTimes(3);
+    });
   });
 });

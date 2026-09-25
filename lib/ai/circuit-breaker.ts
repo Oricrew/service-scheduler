@@ -1,15 +1,20 @@
 /**
- * Simple circuit breaker that opens after `threshold` consecutive failures
- * and resets after `resetTimeMs` of inactivity.
+ * Circuit breaker with three states:
  *
- * States:
- *  - CLOSED  → requests flow through normally
- *  - OPEN    → requests are rejected immediately
- *  - HALF-OPEN → first request after cooldown is allowed as a probe
+ *  - CLOSED    → requests flow through normally
+ *  - OPEN      → requests are rejected immediately
+ *  - HALF-OPEN → exactly one probe request is allowed; concurrent
+ *                callers are still rejected. If the probe succeeds
+ *                the breaker closes; if it fails the breaker reopens
+ *                with a fresh cooldown.
  */
+
+type State = "closed" | "open" | "half-open";
+
 export class CircuitBreaker {
   private consecutiveFailures = 0;
   private lastFailureTime = 0;
+  private state: State = "closed";
   private readonly threshold: number;
   private readonly resetTimeMs: number;
   private readonly nowFn: () => number;
@@ -27,20 +32,34 @@ export class CircuitBreaker {
   }
 
   get isOpen(): boolean {
-    if (this.consecutiveFailures < this.threshold) return false;
-    if (this.nowFn() - this.lastFailureTime >= this.resetTimeMs) {
-      this.consecutiveFailures = 0;
-      return false;
+    if (this.state === "closed") return false;
+
+    if (this.state === "open") {
+      if (this.nowFn() - this.lastFailureTime >= this.resetTimeMs) {
+        this.state = "half-open";
+        return false;
+      }
+      return true;
     }
+
+    // half-open: a probe is already in flight — reject concurrent callers
     return true;
   }
 
   recordSuccess(): void {
     this.consecutiveFailures = 0;
+    this.state = "closed";
   }
 
   recordFailure(): void {
     this.consecutiveFailures++;
     this.lastFailureTime = this.nowFn();
+
+    if (
+      this.state === "half-open" ||
+      this.consecutiveFailures >= this.threshold
+    ) {
+      this.state = "open";
+    }
   }
 }

@@ -81,15 +81,13 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    const statusMap: Record<string, number> = {
+    const clientErrorStatus: Record<string, number> = {
       empty: 400,
       tooLong: 413,
       disabled: 503,
     };
-    return NextResponse.json(
-      { ok: false, error: result.error },
-      { status: statusMap[result.error] ?? 500 },
-    );
+    const status = clientErrorStatus[result.error] ?? 200;
+    return NextResponse.json({ ok: false, error: result.error }, { status });
   }
 
   return NextResponse.json(result);

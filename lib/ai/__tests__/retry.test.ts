@@ -112,4 +112,31 @@ describe("withRetry", () => {
       expect(ms).toBeLessThanOrEqual(2000);
     }
   });
+
+  it("does not retry timeouts when skipTimeouts is true", async () => {
+    const timeoutErr = new AiProviderError("AI provider request timed out", {
+      transient: true,
+    });
+    const fn = vi.fn().mockRejectedValue(timeoutErr);
+
+    await expect(
+      withRetry(fn, { maxRetries: 3, sleep: noopSleep, skipTimeouts: true }),
+    ).rejects.toThrow("timed out");
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("still retries non-timeout transient errors when skipTimeouts is true", async () => {
+    const transient = new AiProviderError("rate limited", {
+      transient: true,
+      statusCode: 429,
+    });
+    const fn = vi.fn().mockRejectedValue(transient);
+
+    await expect(
+      withRetry(fn, { maxRetries: 1, sleep: noopSleep, skipTimeouts: true }),
+    ).rejects.toThrow("rate limited");
+
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
 });

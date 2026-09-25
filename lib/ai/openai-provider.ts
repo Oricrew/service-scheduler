@@ -1,8 +1,20 @@
+import { z } from "zod";
+
 import type { CompletionProvider } from "./types";
 import { AiProviderError, isTransientStatus } from "./errors";
 
-const REQUEST_TIMEOUT_MS = 8_000;
+const DEFAULT_TIMEOUT_MS = 8_000;
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+
+const openaiResponseSchema = z.object({
+  choices: z.array(
+    z.object({
+      message: z.object({
+        content: z.string(),
+      }),
+    }),
+  ),
+});
 
 /**
  * Lightweight OpenAI-compatible fallback provider.
@@ -14,14 +26,15 @@ const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
  */
 export const openaiProvider: CompletionProvider = async (
   prompt,
-  { model, apiKey, system, maxTokens },
+  { model, apiKey, system, maxTokens, timeoutMs },
 ) => {
   const systemContent =
     system ??
     "You are a JSON-only assistant. Reply with valid JSON and nothing else.";
 
+  const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   let res: Response;
   try {
@@ -65,17 +78,24 @@ export const openaiProvider: CompletionProvider = async (
     });
   }
 
-  let body: unknown;
+  let rawBody: unknown;
   try {
-    body = await res.json();
+    rawBody = await res.json();
   } catch {
     throw new AiProviderError("AI provider returned invalid JSON body", {
       transient: false,
     });
   }
 
-  const content = extractContent(body);
-  if (!content) {
+  const parsed = openaiResponseSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    throw new AiProviderError("AI provider returned an unexpected body shape", {
+      transient: false,
+    });
+  }
+
+  const content = parsed.data.choices[0]?.message.content;
+  if (!content || content.trim().length === 0) {
     throw new AiProviderError("AI provider returned an empty response", {
       transient: false,
     });
@@ -83,29 +103,6 @@ export const openaiProvider: CompletionProvider = async (
 
   return content;
 };
-
-function extractContent(body: unknown): string | undefined {
-  if (
-    typeof body === "object" &&
-    body !== null &&
-    "choices" in body &&
-    Array.isArray((body as Record<string, unknown>).choices)
-  ) {
-    const choices = (body as { choices: unknown[] }).choices;
-    const first = choices[0];
-    if (
-      typeof first === "object" &&
-      first !== null &&
-      "message" in first &&
-      typeof (first as Record<string, unknown>).message === "object"
-    ) {
-      const message = (first as { message: Record<string, unknown> }).message;
-      const text = message.content;
-      if (typeof text === "string" && text.trim().length > 0) return text;
-    }
-  }
-  return undefined;
-}
 
 function isAbortError(err: unknown): boolean {
   return err instanceof DOMException && err.name === "AbortError";

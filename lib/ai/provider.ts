@@ -8,7 +8,7 @@ import {
 import type { CompletionProvider } from "./types";
 import { AiProviderError, isTransientStatus } from "./errors";
 
-const REQUEST_TIMEOUT_MS = 8_000;
+const DEFAULT_TIMEOUT_MS = 8_000;
 
 /**
  * Provider that calls Google Gemini via the official SDK.
@@ -21,11 +21,13 @@ const REQUEST_TIMEOUT_MS = 8_000;
  */
 export const geminiProvider: CompletionProvider = async (
   prompt,
-  { model, apiKey, system, maxTokens },
+  { model, apiKey, system, maxTokens, timeoutMs },
 ) => {
   const systemContent =
     system ??
     "You are a JSON-only assistant. Reply with valid JSON and nothing else.";
+
+  const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const generativeModel = genAI.getGenerativeModel({
@@ -42,7 +44,7 @@ export const geminiProvider: CompletionProvider = async (
   try {
     result = await generativeModel.generateContent(
       { contents: [{ role: "user", parts: [{ text: prompt }] }] },
-      { timeout: REQUEST_TIMEOUT_MS },
+      { timeout },
     );
   } catch (err) {
     throw classifyGeminiError(err);

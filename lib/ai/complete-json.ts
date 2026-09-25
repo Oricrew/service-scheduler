@@ -11,13 +11,25 @@ import type {
 } from "./types";
 
 /**
- * Module-level fallback provider, built lazily on first call.
- *
- * Keeping the instance at module scope means the circuit-breaker
- * state inside the chain persists across requests within a single
- * process instead of being rebuilt on every invocation.
+ * Cached fallback provider with the config fingerprint it was built for.
+ * Rebuilt automatically when the resolved config changes (e.g. env var
+ * update, different model, key rotation).
  */
-let cachedFallbackProvider: CompletionProvider | undefined;
+let cachedEntry: { key: string; provider: CompletionProvider } | undefined;
+
+function configKey(
+  primaryModel: string,
+  primaryApiKey: string,
+  fallbackModel: string | undefined,
+  openaiKey: string | undefined,
+): string {
+  return [
+    primaryModel,
+    primaryApiKey ? "k" : "",
+    fallbackModel ?? "",
+    openaiKey ? "o" : "",
+  ].join("|");
+}
 
 /**
  * Send a prompt to the configured AI provider and parse the response
@@ -84,9 +96,16 @@ function getFallbackProvider(
   primaryApiKey: string,
   primaryModel: string,
 ): CompletionProvider {
-  if (cachedFallbackProvider) return cachedFallbackProvider;
-
   const fallbackEnv = getAiFallbackEnv();
+  const key = configKey(
+    primaryModel,
+    primaryApiKey,
+    fallbackEnv.fallbackModel,
+    fallbackEnv.openaiApiKey,
+  );
+
+  if (cachedEntry && cachedEntry.key === key) return cachedEntry.provider;
+
   const entries: ProviderEntry[] = [];
 
   entries.push({
@@ -114,13 +133,14 @@ function getFallbackProvider(
     });
   }
 
-  cachedFallbackProvider = createFallbackProvider(entries);
-  return cachedFallbackProvider;
+  const provider = createFallbackProvider(entries);
+  cachedEntry = { key, provider };
+  return provider;
 }
 
 /** Visible for testing — forces the fallback chain to be rebuilt. */
 export function _resetCachedProvider(): void {
-  cachedFallbackProvider = undefined;
+  cachedEntry = undefined;
 }
 
 const MARKDOWN_FENCE_RE = /^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/;
