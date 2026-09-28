@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import { Card } from "@/components/ui";
 import { getAgendaPageData } from "@/lib/agenda/queries";
 import { agendaViews } from "@/lib/agenda/types";
 import {
@@ -31,8 +32,8 @@ export default async function AgendaPage({
 
   return (
     <section className="grid gap-6">
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="text-sm font-black uppercase tracking-[0.22em] text-sky-700">
+      <Card>
+        <p className="text-sm font-black uppercase tracking-[0.22em] text-primary">
           {t("eyebrow")}
         </p>
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -43,10 +44,10 @@ export default async function AgendaPage({
             {agendaViews.map((agendaView) => (
               <Link
                 className={[
-                  "rounded-full border px-4 py-2 text-sm font-bold",
+                  "rounded-button border px-4 py-2 text-sm font-bold",
                   view === agendaView
-                    ? "border-sky-700 bg-sky-50 text-sky-900"
-                    : "border-slate-200 text-slate-700 hover:border-sky-300 hover:bg-sky-50",
+                    ? "border-primary bg-primary-light text-primary"
+                    : "border-border text-foreground hover:border-primary hover:bg-primary-light",
                 ].join(" ")}
                 href={getAgendaHref(locale, agendaView, selectedDate)}
                 key={agendaView}
@@ -56,17 +57,15 @@ export default async function AgendaPage({
             ))}
           </div>
         </div>
-        <p className="mt-4 text-lg leading-8 text-slate-600">
-          {t("description")}
-        </p>
+        <p className="mt-4 text-lg leading-8 text-muted">{t("description")}</p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-base font-black text-slate-900">
+          <p className="text-base font-black">
             {formatPeriodLabel(view, selectedDate, locale)}
           </p>
           <div className="flex flex-wrap gap-2">
             <Link
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
+              className="rounded-button border border-border px-4 py-2 text-sm font-bold text-foreground hover:border-primary hover:bg-primary-light"
               href={getAgendaHref(
                 locale,
                 view,
@@ -76,13 +75,13 @@ export default async function AgendaPage({
               {t("previous")}
             </Link>
             <Link
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
+              className="rounded-button border border-border px-4 py-2 text-sm font-bold text-foreground hover:border-primary hover:bg-primary-light"
               href={getAgendaHref(locale, view, today)}
             >
               {t("today")}
             </Link>
             <Link
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
+              className="rounded-button border border-border px-4 py-2 text-sm font-bold text-foreground hover:border-primary hover:bg-primary-light"
               href={getAgendaHref(
                 locale,
                 view,
@@ -93,7 +92,7 @@ export default async function AgendaPage({
             </Link>
           </div>
         </div>
-      </div>
+      </Card>
 
       {appointments.length > 0 ? (
         view === "daily" ? (
@@ -108,45 +107,43 @@ export default async function AgendaPage({
 
               return (
                 <Link
-                  className="block rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:ring-sky-300"
+                  className="block rounded-card bg-surface-elevated p-5 shadow-sm ring-1 ring-border transition hover:ring-primary"
                   href={`/${locale}/dashboard/appointments/${appointment.id}`}
                   key={appointment.id}
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-2xl font-black text-slate-950">
+                      <p className="text-2xl font-black">
                         {formatTime(
                           appointmentTime,
                           locale,
                           organization.timezone,
                         )}
                       </p>
-                      <h2 className="mt-3 text-xl font-black text-slate-950">
+                      <h2 className="mt-3 text-xl font-black">
                         {appointment.clients.name}
                       </h2>
-                      <p className="mt-2 text-sm font-semibold text-slate-600">
+                      <p className="mt-2 text-sm font-semibold text-muted">
                         {appointment.services.name}
                       </p>
                     </div>
-                    <span className="w-fit rounded-full bg-sky-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-sky-800">
+                    <span className="w-fit rounded-button bg-primary-light px-4 py-2 text-xs font-black uppercase tracking-wide text-primary">
                       {t(`statuses.${appointment.status}`)}
                     </span>
                   </div>
 
                   <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
                     <div>
-                      <dt className="font-bold text-slate-500">
-                        {t("address")}
-                      </dt>
-                      <dd className="mt-1 font-semibold text-slate-900">
+                      <dt className="font-bold text-muted">{t("address")}</dt>
+                      <dd className="mt-1 font-semibold">
                         {appointment.address}, {appointment.city}
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-bold text-slate-500">
+                      <dt className="font-bold text-muted">
                         {t("technicians")}
                       </dt>
-                      <dd className="mt-1 font-semibold text-slate-900">
+                      <dd className="mt-1 font-semibold">
                         {technicians || t("unassigned")}
                       </dd>
                     </div>
@@ -160,10 +157,10 @@ export default async function AgendaPage({
             {groupedAppointments.map(
               ({ date, appointments: dayAppointments }) => (
                 <section
-                  className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                  className="rounded-card bg-surface-elevated p-5 shadow-sm ring-1 ring-border"
                   key={date}
                 >
-                  <h2 className="text-lg font-black text-slate-950">
+                  <h2 className="text-lg font-black">
                     {formatDate(date, locale)}
                   </h2>
                   <div className="mt-4 grid gap-3">
@@ -174,12 +171,12 @@ export default async function AgendaPage({
 
                       return (
                         <Link
-                          className="flex flex-col gap-2 rounded-2xl bg-slate-50 p-4 transition hover:bg-sky-50 sm:flex-row sm:items-center sm:justify-between"
+                          className="flex flex-col gap-2 rounded-2xl bg-surface p-4 transition hover:bg-primary-light sm:flex-row sm:items-center sm:justify-between"
                           href={`/${locale}/dashboard/appointments/${appointment.id}`}
                           key={appointment.id}
                         >
                           <div>
-                            <p className="text-sm font-black text-slate-950">
+                            <p className="text-sm font-black">
                               {formatTime(
                                 appointmentTime,
                                 locale,
@@ -187,11 +184,11 @@ export default async function AgendaPage({
                               )}{" "}
                               · {appointment.clients.name}
                             </p>
-                            <p className="mt-1 text-sm text-slate-600">
+                            <p className="mt-1 text-sm text-muted">
                               {appointment.services.name}
                             </p>
                           </div>
-                          <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-wide text-sky-800 ring-1 ring-sky-100">
+                          <span className="w-fit rounded-button bg-surface-elevated px-3 py-1 text-xs font-black uppercase tracking-wide text-primary ring-1 ring-ring-focus">
                             {t(`statuses.${appointment.status}`)}
                           </span>
                         </Link>
@@ -204,12 +201,10 @@ export default async function AgendaPage({
           </div>
         )
       ) : (
-        <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm ring-1 ring-slate-200 sm:p-8">
-          <h2 className="text-2xl font-black text-slate-950">
-            {t("emptyTitle")}
-          </h2>
-          <p className="mt-3 text-slate-600">{t("emptyDescription")}</p>
-        </div>
+        <Card className="text-center">
+          <h2 className="text-2xl font-black">{t("emptyTitle")}</h2>
+          <p className="mt-3 text-muted">{t("emptyDescription")}</p>
+        </Card>
       )}
     </section>
   );

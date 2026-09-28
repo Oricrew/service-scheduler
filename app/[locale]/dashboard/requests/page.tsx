@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import { Card, CardHeader } from "@/components/ui";
 import { getPendingRequestsPageData } from "@/lib/requests/queries";
 
 function formatRequestedAt(value: string, locale: string, timezone: string) {
@@ -22,49 +23,46 @@ export default async function RequestsPage({
 
   return (
     <section className="grid gap-6">
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="text-sm font-black uppercase tracking-[0.22em] text-sky-700">
-          {t("eyebrow")}
-        </p>
-        <h1 className="mt-4 text-4xl font-black leading-none tracking-tight">
-          {t("title")}
-        </h1>
-        <p className="mt-4 text-lg leading-8 text-slate-600">
-          {t("description")}
-        </p>
-      </div>
+      <Card>
+        <CardHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          titleAs="h1"
+          description={t("description")}
+        />
+      </Card>
 
       {requests.length > 0 ? (
         <div className="grid gap-4">
           {requests.map((request) => (
             <Link
-              className="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:ring-sky-300"
+              className="rounded-card bg-surface-elevated p-5 shadow-sm ring-1 ring-border transition hover:ring-primary"
               href={`/${locale}/dashboard/appointments/${request.id}`}
               key={request.id}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-2xl font-black text-slate-950">
+                  <p className="text-2xl font-black">
                     {formatRequestedAt(
                       request.requested_start_at,
                       locale,
                       organization.timezone,
                     )}
                   </p>
-                  <h2 className="mt-3 text-xl font-black text-slate-950">
+                  <h2 className="mt-3 text-xl font-black">
                     {request.clients.name}
                   </h2>
-                  <p className="mt-2 text-sm font-semibold text-slate-600">
+                  <p className="mt-2 text-sm font-semibold text-muted">
                     {request.services.name}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {request.services.is_emergency ? (
-                    <span className="w-fit rounded-full bg-rose-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-rose-800">
+                    <span className="w-fit rounded-button bg-rose-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-rose-800">
                       {t("emergency")}
                     </span>
                   ) : null}
-                  <span className="w-fit rounded-full bg-sky-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-sky-800">
+                  <span className="w-fit rounded-button bg-primary-light px-4 py-2 text-xs font-black uppercase tracking-wide text-primary">
                     {t(`statuses.${request.status}`)}
                   </span>
                 </div>
@@ -72,14 +70,14 @@ export default async function RequestsPage({
 
               <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
                 <div>
-                  <dt className="font-bold text-slate-500">{t("address")}</dt>
-                  <dd className="mt-1 font-semibold text-slate-900">
+                  <dt className="font-bold text-muted">{t("address")}</dt>
+                  <dd className="mt-1 font-semibold">
                     {request.address}, {request.city}
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-bold text-slate-500">{t("equipment")}</dt>
-                  <dd className="mt-1 font-semibold text-slate-900">
+                  <dt className="font-bold text-muted">{t("equipment")}</dt>
+                  <dd className="mt-1 font-semibold">
                     {request.equipment_type}
                   </dd>
                 </div>
@@ -88,12 +86,10 @@ export default async function RequestsPage({
           ))}
         </div>
       ) : (
-        <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm ring-1 ring-slate-200 sm:p-8">
-          <h2 className="text-2xl font-black text-slate-950">
-            {t("emptyTitle")}
-          </h2>
-          <p className="mt-3 text-slate-600">{t("emptyDescription")}</p>
-        </div>
+        <Card className="text-center">
+          <h2 className="text-2xl font-black">{t("emptyTitle")}</h2>
+          <p className="mt-3 text-muted">{t("emptyDescription")}</p>
+        </Card>
       )}
     </section>
   );
