@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { z } from "zod";
 
-import { completeJson } from "../complete-json";
+import { completeJson, _resetCachedProvider } from "../complete-json";
+import { _resetBreakers } from "../fallback-chain";
 import type { CompletionProvider } from "../types";
 
 const SuggestionSchema = z.object({
@@ -19,6 +20,8 @@ function failingProvider(error: string): CompletionProvider {
 
 beforeEach(() => {
   vi.unstubAllEnvs();
+  _resetCachedProvider();
+  _resetBreakers();
 });
 
 describe("completeJson", () => {
