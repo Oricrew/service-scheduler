@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { Card } from "@/components/ui";
 import { getUserRole, hasMinimumRole } from "@/lib/auth";
 import { durationPresets } from "@/lib/appointments/constants";
 import { canAssignStatus, canConfirmStatus } from "@/lib/appointments/status";
@@ -110,23 +111,23 @@ export default async function DashboardAppointmentPage({
   return (
     <section className="grid gap-6">
       {isConfirmSuccess(confirmed) ? (
-        <p className="rounded-[1.75rem] bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
+        <p className="rounded-card bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
           {t("confirmedSuccess")}
         </p>
       ) : null}
       {isAssignSuccess(assigned) ? (
-        <p className="rounded-[1.75rem] bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
+        <p className="rounded-card bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200">
           {t("assignedSuccess")}
         </p>
       ) : null}
       {isSchedulingConflict(conflict) ? (
-        <p className="rounded-[1.75rem] bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-900 ring-1 ring-rose-200">
+        <p className="rounded-card bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-900 ring-1 ring-rose-200">
           {t("schedulingConflict")}
         </p>
       ) : null}
 
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="text-sm font-black uppercase tracking-[0.22em] text-sky-700">
+      <Card>
+        <p className="text-sm font-black uppercase tracking-[0.22em] text-primary">
           {t("eyebrow")}
         </p>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -134,34 +135,34 @@ export default async function DashboardAppointmentPage({
             <h1 className="text-4xl font-black leading-none tracking-tight">
               {appointment.clients.name}
             </h1>
-            <p className="mt-3 text-lg font-semibold text-slate-600">
+            <p className="mt-3 text-lg font-semibold text-muted">
               {appointment.services.name}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {appointment.services.is_emergency ? (
-              <span className="w-fit rounded-full bg-rose-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-rose-800">
+              <span className="w-fit rounded-button bg-rose-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-rose-800">
                 {t("emergency")}
               </span>
             ) : null}
-            <span className="w-fit rounded-full bg-sky-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-sky-800">
+            <span className="w-fit rounded-button bg-primary-light px-4 py-2 text-xs font-black uppercase tracking-wide text-primary">
               {t(`statuses.${appointment.status}`)}
             </span>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
+      <Card>
         <dl className="grid gap-5 text-sm sm:grid-cols-2">
           <div>
-            <dt className="font-bold text-slate-500">{t("requestedAt")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
+            <dt className="font-bold text-muted">{t("requestedAt")}</dt>
+            <dd className="mt-1 font-semibold">
               {formatDateTime(appointmentTime, locale, organization.timezone)}
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">{t("submittedAt")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
+            <dt className="font-bold text-muted">{t("submittedAt")}</dt>
+            <dd className="mt-1 font-semibold">
               {formatDateTime(
                 appointment.created_at,
                 locale,
@@ -170,11 +171,11 @@ export default async function DashboardAppointmentPage({
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">{t("phone")}</dt>
-            <dd className="mt-1 flex flex-wrap items-center gap-2 font-semibold text-slate-950">
+            <dt className="font-bold text-muted">{t("phone")}</dt>
+            <dd className="mt-1 flex flex-wrap items-center gap-2 font-semibold">
               <span>{appointment.clients.phone}</span>
               <a
-                className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-800 ring-1 ring-emerald-100 hover:bg-emerald-100"
+                className="rounded-button bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-800 ring-1 ring-emerald-100 hover:bg-emerald-100"
                 href={whatsappUrl}
                 rel="noreferrer"
                 target="_blank"
@@ -184,28 +185,24 @@ export default async function DashboardAppointmentPage({
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">{t("email")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
-              {appointment.clients.email}
-            </dd>
+            <dt className="font-bold text-muted">{t("email")}</dt>
+            <dd className="mt-1 font-semibold">{appointment.clients.email}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="font-bold text-slate-500">{t("address")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
+            <dt className="font-bold text-muted">{t("address")}</dt>
+            <dd className="mt-1 font-semibold">
               {appointment.address}, {appointment.city}
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">{t("equipment")}</dt>
-            <dd className="mt-1 font-semibold text-slate-950">
+            <dt className="font-bold text-muted">{t("equipment")}</dt>
+            <dd className="mt-1 font-semibold">
               {appointment.equipment_type}
               {appointment.brand_model ? ` · ${appointment.brand_model}` : ""}
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">
-              {t("estimatedDuration")}
-            </dt>
+            <dt className="font-bold text-muted">{t("estimatedDuration")}</dt>
             <dd className="mt-2">
               {canEditDuration ? (
                 <div className="flex flex-wrap gap-2">
@@ -224,8 +221,8 @@ export default async function DashboardAppointmentPage({
                         aria-pressed={effectiveDurationMinutes === minutes}
                         className={
                           effectiveDurationMinutes === minutes
-                            ? "rounded-full bg-sky-50 px-4 py-2 text-sm font-bold text-sky-900 ring-2 ring-sky-300 disabled:cursor-not-allowed disabled:opacity-70"
-                            : "rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+                            ? "rounded-button bg-primary-light px-4 py-2 text-sm font-bold text-primary ring-2 ring-primary disabled:cursor-not-allowed disabled:opacity-70"
+                            : "rounded-button border border-border px-4 py-2 text-sm font-bold text-foreground hover:border-primary hover:bg-primary-light disabled:cursor-not-allowed disabled:border-border disabled:bg-surface disabled:text-muted"
                         }
                         pendingChildren={t("durationPreset", { minutes })}
                       >
@@ -235,26 +232,26 @@ export default async function DashboardAppointmentPage({
                   ))}
                 </div>
               ) : (
-                <span className="font-semibold text-slate-950">
+                <span className="font-semibold">
                   {t("durationPreset", { minutes: effectiveDurationMinutes })}
                 </span>
               )}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="font-bold text-slate-500">{t("problem")}</dt>
-            <dd className="mt-1 leading-6 text-slate-700">
+            <dt className="font-bold text-muted">{t("problem")}</dt>
+            <dd className="mt-1 leading-6 text-muted">
               {appointment.problem_description}
             </dd>
           </div>
           {canAssignStatus(appointment.status) ? (
             <div className="sm:col-span-2">
-              <dt className="font-bold text-slate-500">{t("technicians")}</dt>
+              <dt className="font-bold text-muted">{t("technicians")}</dt>
               <dd className="mt-2 flex flex-wrap gap-2">
                 {appointment.appointment_technicians.length > 0 ? (
                   appointment.appointment_technicians.map((assignment) => (
                     <span
-                      className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-900 ring-1 ring-sky-100"
+                      className="inline-flex items-center gap-1 rounded-button bg-primary-light px-3 py-1.5 text-sm font-semibold text-primary ring-1 ring-ring-focus"
                       key={assignment.technician_id}
                     >
                       {assignment.technicians.name}
@@ -272,7 +269,7 @@ export default async function DashboardAppointmentPage({
                             aria-label={t("removeTechnician", {
                               name: assignment.technicians.name,
                             })}
-                            className="rounded-full px-1 text-sky-600 hover:bg-sky-100 hover:text-sky-900 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="rounded-button px-1 text-primary hover:bg-primary-light hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                             pendingChildren="×"
                           >
                             ×
@@ -282,17 +279,15 @@ export default async function DashboardAppointmentPage({
                     </span>
                   ))
                 ) : (
-                  <span className="font-semibold text-slate-950">
-                    {t("unassigned")}
-                  </span>
+                  <span className="font-semibold">{t("unassigned")}</span>
                 )}
               </dd>
             </div>
           ) : null}
           {appointment.client_notes ? (
             <div className="sm:col-span-2">
-              <dt className="font-bold text-slate-500">{t("notes")}</dt>
-              <dd className="mt-1 leading-6 text-slate-700">
+              <dt className="font-bold text-muted">{t("notes")}</dt>
+              <dd className="mt-1 leading-6 text-muted">
                 {appointment.client_notes}
               </dd>
             </div>
@@ -300,13 +295,11 @@ export default async function DashboardAppointmentPage({
         </dl>
 
         {canEditAssignments ? (
-          <div className="mt-8 border-t border-slate-200 pt-8">
-            <h2 className="text-lg font-black text-slate-950">
-              {t("assignTechnicians")}
-            </h2>
+          <div className="mt-8 border-t border-border pt-8">
+            <h2 className="text-lg font-black">{t("assignTechnicians")}</h2>
             {activeTechnicians.length > 0 ? (
               allTechniciansAssigned ? (
-                <p className="mt-3 text-sm font-semibold text-slate-500">
+                <p className="mt-3 text-sm font-semibold text-muted">
                   {t("allTechniciansAssigned")}
                 </p>
               ) : (
@@ -326,13 +319,13 @@ export default async function DashboardAppointmentPage({
                       <label
                         className={
                           isBusy
-                            ? "flex items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400"
-                            : "flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900"
+                            ? "flex items-center gap-3 rounded-2xl bg-surface px-4 py-3 text-sm font-semibold text-muted"
+                            : "flex items-center gap-3 rounded-2xl bg-surface px-4 py-3 text-sm font-semibold text-foreground"
                         }
                         key={technician.id}
                       >
                         <input
-                          className="size-4 rounded border-slate-300"
+                          className="size-4 rounded border-border"
                           disabled={!canManageAppointment || isBusy}
                           name="technicianIds"
                           type="checkbox"
@@ -351,7 +344,7 @@ export default async function DashboardAppointmentPage({
                   })}
                   <div className="flex flex-col gap-2">
                     <SubmitButton
-                      className="w-fit rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
+                      className="w-fit rounded-button bg-foreground px-6 py-3 text-sm font-black text-surface-elevated shadow-sm hover:bg-foreground/85 disabled:cursor-not-allowed disabled:bg-muted disabled:hover:bg-muted"
                       disabled={!canManageAppointment}
                       pendingChildren={`${t("saveAssignments")}...`}
                     >
@@ -361,41 +354,37 @@ export default async function DashboardAppointmentPage({
                 </form>
               )
             ) : (
-              <p className="mt-3 text-sm font-semibold text-slate-500">
+              <p className="mt-3 text-sm font-semibold text-muted">
                 {t("noTechniciansAvailable")}
               </p>
             )}
           </div>
         ) : !canAssignStatus(appointment.status) ? (
-          <div className="mt-8 border-t border-slate-200 pt-8">
-            <p className="text-sm font-bold text-slate-500">
-              {t("technicians")}
-            </p>
+          <div className="mt-8 border-t border-border pt-8">
+            <p className="text-sm font-bold text-muted">{t("technicians")}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {appointment.appointment_technicians.length > 0 ? (
                 appointment.appointment_technicians.map((assignment) => (
                   <span
-                    className="inline-flex items-center rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-900 ring-1 ring-sky-100"
+                    className="inline-flex items-center rounded-button bg-primary-light px-3 py-1.5 text-sm font-semibold text-primary ring-1 ring-ring-focus"
                     key={assignment.technician_id}
                   >
                     {assignment.technicians.name}
                   </span>
                 ))
               ) : (
-                <span className="text-sm font-semibold text-slate-950">
-                  {t("unassigned")}
-                </span>
+                <span className="text-sm font-semibold">{t("unassigned")}</span>
               )}
             </div>
           </div>
         ) : null}
 
-        <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-8">
+        <div className="mt-8 flex flex-col gap-3 border-t border-border pt-8">
           {canManageAppointment && canConfirmStatus(appointment.status) ? (
             <div className="flex flex-col gap-2">
               <form action={confirmWithLocale}>
                 <SubmitButton
-                  className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
+                  className="rounded-button bg-foreground px-6 py-3 text-sm font-black text-surface-elevated shadow-sm hover:bg-foreground/85 disabled:cursor-not-allowed disabled:bg-muted disabled:hover:bg-muted"
                   disabled={!canManageAppointment}
                   pendingChildren={`${t("confirm")}...`}
                 >
@@ -405,13 +394,13 @@ export default async function DashboardAppointmentPage({
             </div>
           ) : null}
           <Link
-            className="inline-flex w-fit rounded-full border border-slate-200 px-5 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50"
+            className="inline-flex w-fit rounded-button border border-border px-5 py-2 text-sm font-bold text-foreground hover:border-primary hover:bg-primary-light"
             href={backHref}
           >
             {backLabel}
           </Link>
         </div>
-      </div>
+      </Card>
     </section>
   );
 }
