@@ -1,18 +1,16 @@
-import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
+
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Service Scheduler",
-  description: "Mobile-first scheduling for field-service companies.",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="es">
+    <html lang={locale}>
       <body>{children}</body>
     </html>
   );

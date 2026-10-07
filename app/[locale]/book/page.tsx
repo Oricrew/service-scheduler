@@ -6,10 +6,14 @@ import { CardHeader } from "@/components/ui";
 import { isAiConfigured } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
+import { pageMetadata } from "@/lib/seo/metadata";
+
 import { createAppointmentRequest } from "./actions";
 import { BookingForm } from "./booking-form";
 
 type Locale = (typeof routing.locales)[number];
+
+export const generateMetadata = pageMetadata({ pageId: "book", path: "book" });
 
 const serviceTypes = [
   "repair",

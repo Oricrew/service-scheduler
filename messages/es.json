@@ -1,4 +1,38 @@
 {
+  "Seo": {
+    "siteName": "ORICREW",
+    "ogImageAlt": "ORICREW — software para servicios de campo",
+    "services": {
+      "fieldScheduling": {
+        "name": "Agenda de servicios de campo",
+        "description": "Solicitudes de turno desde el celular, confirmación del supervisor y agenda para técnicos en empresas de servicio.",
+        "serviceType": "Software de operaciones de servicio de campo",
+        "areaServed": "América Latina"
+      }
+    },
+    "pages": {
+      "home": {
+        "title": "Agenda de servicios de campo con control para supervisores",
+        "description": "Tus clientes piden visitas desde cualquier dispositivo mientras tu equipo confirma horarios, asigna técnicos y organiza la agenda diaria."
+      },
+      "book": {
+        "title": "Solicitar una visita técnica",
+        "description": "Compartí tus datos, el equipo y el horario preferido. Un supervisor revisa cada solicitud antes de confirmar la visita."
+      },
+      "bookConfirmation": {
+        "title": "Solicitud recibida",
+        "description": "Tu solicitud de turno está pendiente de revisión del supervisor."
+      },
+      "clientShowcase": {
+        "title": "{name} — showcase de agenda de campo",
+        "description": "Conocé cómo {name} usa la agenda ORICREW para reservas de clientes, aprobación de supervisores y agendas listas para campo."
+      },
+      "login": {
+        "title": "Acceso interno",
+        "description": "Ingresá al panel de operaciones."
+      }
+    }
+  },
   "Home": {
     "brand": "Service Scheduler",
     "eyebrow": "Service Scheduler",
@@ -333,11 +367,30 @@
     "unassigned": "Sin asignar",
     "footer": "Contactanos si necesitás actualizar algún detalle del turno."
   },
+  "AppointmentClient": {
+    "eyebrow": "Tu turno",
+    "title": "Detalle del turno",
+    "statusLabel": "Estado:",
+    "backToHome": "Volver al inicio",
+    "fields": {
+      "client": "Cliente",
+      "service": "Servicio",
+      "dateTime": "Fecha y horario",
+      "contact": "Contacto",
+      "address": "Dirección",
+      "equipment": "Equipo",
+      "problem": "Problema",
+      "notes": "Notas"
+    }
+  },
   "Clients": {
-    "eyebrow": "Nuestros clientes",
-    "description": "Empresas que usan Service Scheduler para organizar sus visitas técnicas.",
+    "eyebrow": "Trabajo seleccionado",
+    "title": "Productos que lanzamos para equipos de servicio",
+    "description": "Explorá una experiencia de agenda en vivo pensada para empresas que hacen visitas técnicas todos los días.",
     "refrigo": {
-      "name": "Refrigo"
+      "name": "Refrigo",
+      "logoAlt": "Logo de Refrigo",
+      "caseStudyLink": "Ver el caso Refrigo"
     }
   },
   "ClientShowcase": {

@@ -1,6 +1,7 @@
 export const clients = [
   {
     id: "refrigo",
+    caseStudyPath: "/refrigo",
     logo: {
       src: "/clients/refrigo/logotipo.png",
       width: 200,

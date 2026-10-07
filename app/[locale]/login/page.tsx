@@ -5,9 +5,17 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { PageShell } from "@/components/page-shell";
 import { routing } from "@/i18n/routing";
 
+import { pageMetadata, privatePageRobots } from "@/lib/seo/metadata";
+
 import { signIn } from "./actions";
 
 type Locale = (typeof routing.locales)[number];
+
+export const generateMetadata = pageMetadata({
+  pageId: "login",
+  path: "login",
+  robots: privatePageRobots,
+});
 
 const errorKeys = ["invalid", "missing"] as const;
 

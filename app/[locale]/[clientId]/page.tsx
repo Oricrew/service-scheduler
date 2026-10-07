@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
 import { clients, getClient } from "@/lib/clients";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 import styles from "./client-theme.module.css";
 
@@ -17,6 +18,24 @@ const steps = ["request", "review", "visit"] as const;
 export function generateStaticParams() {
   return clients.map((c) => ({ clientId: c.id }));
 }
+
+export const generateMetadata = pageMetadata({
+  pageId: "clientShowcase",
+  resolve: async ({ locale, params }) => {
+    const client = getClient(params.clientId);
+
+    if (!client) {
+      return null;
+    }
+
+    const tc = await getTranslations({ locale, namespace: "Clients" });
+
+    return {
+      path: client.id,
+      values: { name: tc(`${client.id}.name`) },
+    };
+  },
+});
 
 export default async function ClientShowcase({
   params,
@@ -57,7 +76,7 @@ export default async function ClientShowcase({
           href={`/${currentLocale}/${clientId}`}
         >
           <Image
-            alt={tc(`${clientId}.name`)}
+            alt={tc(`${clientId}.logoAlt`)}
             height={36}
             priority
             src={client.logo.src}
