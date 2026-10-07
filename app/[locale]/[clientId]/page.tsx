@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
 import { clients, getClient } from "@/lib/clients";
-import { createPageMetadata } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 import styles from "./client-theme.module.css";
 
@@ -20,27 +19,23 @@ export function generateStaticParams() {
   return clients.map((c) => ({ clientId: c.id }));
 }
 
-export async function generateMetadata({
-  params,
-}: Readonly<{
-  params: Promise<{ locale: string; clientId: string }>;
-}>): Promise<Metadata> {
-  const { locale, clientId } = await params;
-  const client = getClient(clientId);
+export const generateMetadata = pageMetadata({
+  pageId: "clientShowcase",
+  resolve: async ({ locale, params }) => {
+    const client = getClient(params.clientId);
 
-  if (!client) {
-    return {};
-  }
+    if (!client) {
+      return null;
+    }
 
-  const tc = await getTranslations({ locale, namespace: "Clients" });
+    const tc = await getTranslations({ locale, namespace: "Clients" });
 
-  return createPageMetadata({
-    locale,
-    path: client.id,
-    pageId: "clientShowcase",
-    values: { name: tc(`${client.id}.name`) },
-  });
-}
+    return {
+      path: client.id,
+      values: { name: tc(`${client.id}.name`) },
+    };
+  },
+});
 
 export default async function ClientShowcase({
   params,

@@ -1,28 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardHeader } from "@/components/ui";
 import { routing } from "@/i18n/routing";
-import { createPageMetadata, privatePageRobots } from "@/lib/seo/metadata";
+import { pageMetadata, privatePageRobots } from "@/lib/seo/metadata";
 
 type Locale = (typeof routing.locales)[number];
 
-export async function generateMetadata({
-  params,
-}: Readonly<{
-  params: Promise<{ locale: string }>;
-}>): Promise<Metadata> {
-  const { locale } = await params;
-
-  return createPageMetadata({
-    locale,
-    path: "book/confirmation",
-    pageId: "bookConfirmation",
-    robots: privatePageRobots,
-  });
-}
+export const generateMetadata = pageMetadata({
+  pageId: "bookConfirmation",
+  path: "book/confirmation",
+  robots: privatePageRobots,
+});
 
 export default async function BookingConfirmationPage({
   params,

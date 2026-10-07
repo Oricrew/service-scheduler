@@ -2,16 +2,10 @@ import type { MetadataRoute } from "next";
 
 import { routing } from "@/i18n/routing";
 import { clients } from "@/lib/clients";
-import {
-  flagshipCaseStudyPageIds,
-  flagshipCaseStudyPaths,
-  publicSitemapPageIds,
-  publicSitemapPagePaths,
-} from "@/lib/seo/routes";
-import { getSiteUrl, localizedPath } from "@/lib/seo/urls";
+import { publicSitemapPageIds, publicSitemapPagePaths } from "@/lib/seo/routes";
+import { absoluteUrl, canonicalUrl } from "@/lib/seo/urls";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = getSiteUrl();
   const lastModified = new Date();
   const entries: MetadataRoute.Sitemap = [];
 
@@ -19,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (const pageId of publicSitemapPageIds) {
       const path = publicSitemapPagePaths[pageId];
       entries.push({
-        url: new URL(localizedPath(locale, path), siteUrl).toString(),
+        url: canonicalUrl(locale, path),
         lastModified,
         changeFrequency: pageId === "home" ? "weekly" : "monthly",
         priority: pageId === "home" ? 1 : 0.8,
@@ -28,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     for (const client of clients) {
       entries.push({
-        url: new URL(localizedPath(locale, client.id), siteUrl).toString(),
+        url: canonicalUrl(locale, client.id),
         lastModified,
         changeFrequency: "monthly",
         priority: 0.7,
@@ -36,9 +30,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  for (const caseStudyId of flagshipCaseStudyPageIds) {
+  for (const client of clients) {
+    if (!client.caseStudyPath) {
+      continue;
+    }
+
     entries.push({
-      url: new URL(flagshipCaseStudyPaths[caseStudyId], siteUrl).toString(),
+      url: absoluteUrl(client.caseStudyPath),
       lastModified,
       changeFrequency: "monthly",
       priority: 0.9,

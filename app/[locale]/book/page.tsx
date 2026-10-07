@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
@@ -7,26 +6,14 @@ import { CardHeader } from "@/components/ui";
 import { isAiConfigured } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
-import { createPageMetadata } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 import { createAppointmentRequest } from "./actions";
 import { BookingForm } from "./booking-form";
 
 type Locale = (typeof routing.locales)[number];
 
-export async function generateMetadata({
-  params,
-}: Readonly<{
-  params: Promise<{ locale: string }>;
-}>): Promise<Metadata> {
-  const { locale } = await params;
-
-  return createPageMetadata({
-    locale,
-    path: "book",
-    pageId: "book",
-  });
-}
+export const generateMetadata = pageMetadata({ pageId: "book", path: "book" });
 
 const serviceTypes = [
   "repair",

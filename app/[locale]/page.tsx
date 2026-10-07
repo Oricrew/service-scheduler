@@ -1,41 +1,23 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
-import { clients, type ClientId } from "@/lib/clients";
+import { clients, type ClientEntry } from "@/lib/clients";
 import { getHomeJsonLd, JsonLd } from "@/lib/seo/json-ld";
-import { createPageMetadata } from "@/lib/seo/metadata";
-import {
-  clientCaseStudyPathById,
-  flagshipCaseStudyPaths,
-} from "@/lib/seo/routes";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 type Locale = (typeof routing.locales)[number];
 
 const benefits = ["booking", "approval", "mobile"] as const;
 const steps = ["request", "review", "visit"] as const;
 
-function getClientHref(clientId: ClientId, locale: Locale) {
-  const caseStudyPath = clientCaseStudyPathById[clientId];
-  return caseStudyPath ?? `/${locale}/${clientId}`;
+function getClientHref(client: ClientEntry, locale: Locale) {
+  return client.caseStudyPath ?? `/${locale}/${client.id}`;
 }
 
-export async function generateMetadata({
-  params,
-}: Readonly<{
-  params: Promise<{ locale: string }>;
-}>): Promise<Metadata> {
-  const { locale } = await params;
-
-  return createPageMetadata({
-    locale,
-    path: "",
-    pageId: "home",
-  });
-}
+export const generateMetadata = pageMetadata({ pageId: "home", path: "" });
 
 export default async function Home({
   params,
@@ -48,6 +30,7 @@ export default async function Home({
   const tc = await getTranslations({ locale, namespace: "Clients" });
   const bookHref = `/${currentLocale}/book`;
   const dashboardHref = `/${currentLocale}/dashboard`;
+  const caseStudyClient = clients.find((client) => client.caseStudyPath);
   const jsonLd = await getHomeJsonLd(locale);
 
   return (
@@ -189,7 +172,7 @@ export default async function Home({
           {clients.map((client) => (
             <Link
               className="opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
-              href={getClientHref(client.id, currentLocale)}
+              href={getClientHref(client, currentLocale)}
               key={client.id}
             >
               <Image
@@ -201,14 +184,16 @@ export default async function Home({
             </Link>
           ))}
         </div>
-        <p className="mt-6 text-center">
-          <Link
-            className="text-sm font-bold text-primary hover:underline"
-            href={flagshipCaseStudyPaths.refrigoCaseStudy}
-          >
-            {tc("refrigo.caseStudyLink")}
-          </Link>
-        </p>
+        {caseStudyClient?.caseStudyPath ? (
+          <p className="mt-6 text-center">
+            <Link
+              className="text-sm font-bold text-primary hover:underline"
+              href={caseStudyClient.caseStudyPath}
+            >
+              {tc(`${caseStudyClient.id}.caseStudyLink`)}
+            </Link>
+          </p>
+        ) : null}
       </section>
 
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 pb-16 pt-4 sm:px-8 md:flex-row md:items-center md:justify-between">
