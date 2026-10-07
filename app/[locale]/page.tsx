@@ -1,15 +1,41 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
-import { clients } from "@/lib/clients";
+import { clients, type ClientId } from "@/lib/clients";
+import { getHomeJsonLd, JsonLd } from "@/lib/seo/json-ld";
+import { createPageMetadata } from "@/lib/seo/metadata";
+import {
+  clientCaseStudyPathById,
+  flagshipCaseStudyPaths,
+} from "@/lib/seo/routes";
 
 type Locale = (typeof routing.locales)[number];
 
 const benefits = ["booking", "approval", "mobile"] as const;
 const steps = ["request", "review", "visit"] as const;
+
+function getClientHref(clientId: ClientId, locale: Locale) {
+  const caseStudyPath = clientCaseStudyPathById[clientId];
+  return caseStudyPath ?? `/${locale}/${clientId}`;
+}
+
+export async function generateMetadata({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string }>;
+}>): Promise<Metadata> {
+  const { locale } = await params;
+
+  return createPageMetadata({
+    locale,
+    path: "",
+    pageId: "home",
+  });
+}
 
 export default async function Home({
   params,
@@ -22,9 +48,11 @@ export default async function Home({
   const tc = await getTranslations({ locale, namespace: "Clients" });
   const bookHref = `/${currentLocale}/book`;
   const dashboardHref = `/${currentLocale}/dashboard`;
+  const jsonLd = await getHomeJsonLd(locale);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
+      <JsonLd data={jsonLd} />
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
         <Link
           className="text-base font-black tracking-tight sm:text-lg"
@@ -141,19 +169,31 @@ export default async function Home({
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8">
+      <section
+        aria-labelledby="clients-heading"
+        className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8"
+      >
         <p className="text-center text-sm font-black uppercase tracking-[0.22em] text-slate-400">
           {tc("eyebrow")}
+        </p>
+        <h2
+          className="mt-3 text-center text-2xl font-black tracking-tight text-slate-950"
+          id="clients-heading"
+        >
+          {tc("title")}
+        </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center leading-7 text-slate-600">
+          {tc("description")}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
           {clients.map((client) => (
             <Link
               className="opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
-              href={`/${currentLocale}/${client.id}`}
+              href={getClientHref(client.id, currentLocale)}
               key={client.id}
             >
               <Image
-                alt={tc(`${client.id}.name`)}
+                alt={tc(`${client.id}.logoAlt`)}
                 height={57}
                 src={client.logo.src}
                 width={160}
@@ -161,6 +201,14 @@ export default async function Home({
             </Link>
           ))}
         </div>
+        <p className="mt-6 text-center">
+          <Link
+            className="text-sm font-bold text-primary hover:underline"
+            href={flagshipCaseStudyPaths.refrigoCaseStudy}
+          >
+            {tc("refrigo.caseStudyLink")}
+          </Link>
+        </p>
       </section>
 
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 pb-16 pt-4 sm:px-8 md:flex-row md:items-center md:justify-between">

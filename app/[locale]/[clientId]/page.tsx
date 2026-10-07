@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
 import { clients, getClient } from "@/lib/clients";
+import { createPageMetadata } from "@/lib/seo/metadata";
 
 import styles from "./client-theme.module.css";
 
@@ -16,6 +18,28 @@ const steps = ["request", "review", "visit"] as const;
 
 export function generateStaticParams() {
   return clients.map((c) => ({ clientId: c.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string; clientId: string }>;
+}>): Promise<Metadata> {
+  const { locale, clientId } = await params;
+  const client = getClient(clientId);
+
+  if (!client) {
+    return {};
+  }
+
+  const tc = await getTranslations({ locale, namespace: "Clients" });
+
+  return createPageMetadata({
+    locale,
+    path: client.id,
+    pageId: "clientShowcase",
+    values: { name: tc(`${client.id}.name`) },
+  });
 }
 
 export default async function ClientShowcase({
@@ -57,7 +81,7 @@ export default async function ClientShowcase({
           href={`/${currentLocale}/${clientId}`}
         >
           <Image
-            alt={tc(`${clientId}.name`)}
+            alt={tc(`${clientId}.logoAlt`)}
             height={36}
             priority
             src={client.logo.src}

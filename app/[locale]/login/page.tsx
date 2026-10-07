@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
@@ -5,9 +6,26 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { PageShell } from "@/components/page-shell";
 import { routing } from "@/i18n/routing";
 
+import { createPageMetadata, privatePageRobots } from "@/lib/seo/metadata";
+
 import { signIn } from "./actions";
 
 type Locale = (typeof routing.locales)[number];
+
+export async function generateMetadata({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string }>;
+}>): Promise<Metadata> {
+  const { locale } = await params;
+
+  return createPageMetadata({
+    locale,
+    path: "login",
+    pageId: "login",
+    robots: privatePageRobots,
+  });
+}
 
 const errorKeys = ["invalid", "missing"] as const;
 

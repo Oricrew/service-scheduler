@@ -1,4 +1,45 @@
 {
+  "Seo": {
+    "siteName": "ORICREW",
+    "ogImageAlt": "ORICREW — field service software",
+    "organizations": {
+      "oricrew": {
+        "name": "ORICREW",
+        "url": "https://oricrew.com",
+        "email": "hello@oricrew.com"
+      }
+    },
+    "services": {
+      "fieldScheduling": {
+        "name": "Field service scheduling",
+        "description": "Mobile-first appointment requests, supervisor approval, and technician agendas for service companies.",
+        "serviceType": "Field service operations software",
+        "areaServed": "Latin America"
+      }
+    },
+    "pages": {
+      "home": {
+        "title": "Field service scheduling that keeps supervisors in control",
+        "description": "Let clients request visits from any device while your team confirms times, assigns technicians, and runs a clear daily agenda."
+      },
+      "book": {
+        "title": "Request a service visit",
+        "description": "Share your contact details, equipment, and preferred time. A supervisor reviews every request before confirming the visit."
+      },
+      "bookConfirmation": {
+        "title": "Request received",
+        "description": "Your appointment request is pending supervisor review."
+      },
+      "clientShowcase": {
+        "title": "{name} — field scheduling showcase",
+        "description": "See how {name} uses ORICREW scheduling for client bookings, supervisor approval, and field-ready agendas."
+      },
+      "login": {
+        "title": "Internal sign-in",
+        "description": "Sign in to the operations dashboard."
+      }
+    }
+  },
   "Home": {
     "brand": "Service Scheduler",
     "eyebrow": "Service Scheduler",
@@ -333,11 +374,30 @@
     "unassigned": "Unassigned",
     "footer": "Please contact us if you need to update any appointment details."
   },
+  "AppointmentClient": {
+    "eyebrow": "Your appointment",
+    "title": "Appointment details",
+    "statusLabel": "Status:",
+    "backToHome": "Back to home",
+    "fields": {
+      "client": "Client",
+      "service": "Service",
+      "dateTime": "Date and time",
+      "contact": "Contact",
+      "address": "Address",
+      "equipment": "Equipment",
+      "problem": "Problem",
+      "notes": "Notes"
+    }
+  },
   "Clients": {
-    "eyebrow": "Our clients",
-    "description": "Companies using Service Scheduler to organize their field visits.",
+    "eyebrow": "Selected work",
+    "title": "Products we ship for service teams",
+    "description": "Explore a live scheduling experience built for companies that run field visits every day.",
     "refrigo": {
-      "name": "Refrigo"
+      "name": "Refrigo",
+      "logoAlt": "Refrigo logo",
+      "caseStudyLink": "View the Refrigo case study"
     }
   },
   "ClientShowcase": {

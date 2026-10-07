@@ -19,8 +19,15 @@ function isClientZonePath(pathname: string) {
   );
 }
 
+function isSeoMetadataPath(pathname: string) {
+  return pathname === "/robots.txt" || pathname === "/sitemap.xml";
+}
+
 export default async function proxy(request: NextRequest) {
-  if (isClientZonePath(request.nextUrl.pathname)) {
+  if (
+    isClientZonePath(request.nextUrl.pathname) ||
+    isSeoMetadataPath(request.nextUrl.pathname)
+  ) {
     return NextResponse.next();
   }
 
