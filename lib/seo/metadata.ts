@@ -14,7 +14,7 @@ export const privatePageRobots: Metadata["robots"] = {
   follow: false,
 };
 
-export type SeoPageId =
+type SeoPageId =
   | "home"
   | "book"
   | "bookConfirmation"
@@ -29,7 +29,7 @@ type CreatePageMetadataOptions = {
   robots?: Metadata["robots"];
 };
 
-export async function createPageMetadata({
+async function createPageMetadata({
   locale,
   path,
   pageId,

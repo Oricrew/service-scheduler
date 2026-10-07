@@ -2,13 +2,6 @@
   "Seo": {
     "siteName": "ORICREW",
     "ogImageAlt": "ORICREW — field service software",
-    "organizations": {
-      "oricrew": {
-        "name": "ORICREW",
-        "url": "https://oricrew.com",
-        "email": "hello@oricrew.com"
-      }
-    },
     "services": {
       "fieldScheduling": {
         "name": "Field service scheduling",

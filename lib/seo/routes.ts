@@ -1,13 +1,13 @@
 export const publicSitemapPageIds = ["home", "book"] as const;
 
-export type PublicSitemapPageId = (typeof publicSitemapPageIds)[number];
+type PublicSitemapPageId = (typeof publicSitemapPageIds)[number];
 
 export const publicSitemapPagePaths: Record<PublicSitemapPageId, string> = {
   home: "",
   book: "book",
 };
 
-export const privateRoutePrefixes = [
+const privateRoutePrefixes = [
   "dashboard",
   "login",
   "appointment",
@@ -15,13 +15,5 @@ export const privateRoutePrefixes = [
 ] as const;
 
 export function robotsDisallowPaths(): string[] {
-  return [
-    "/api/",
-    ...privateRoutePrefixes.flatMap((prefix) => {
-      const scoped = `/*/${prefix}`;
-      return prefix === "login" || prefix === "book/confirmation"
-        ? [scoped]
-        : [scoped, `${scoped}/`];
-    }),
-  ];
+  return ["/api/", ...privateRoutePrefixes.map((p) => `/*/${p}`)];
 }

@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
-import { seoOgImagePath, seoOrganizationId } from "@/lib/seo/site";
-import { absoluteUrl } from "@/lib/seo/urls";
+import { seoContactEmail, seoOgImagePath } from "@/lib/seo/site";
+import { absoluteUrl, getSiteUrl } from "@/lib/seo/urls";
 
 type JsonLdGraph = Record<string, unknown>;
 
@@ -20,16 +20,17 @@ export function JsonLd({ data }: JsonLdProps) {
 
 export async function getHomeJsonLd(locale: string) {
   const t = await getTranslations({ locale, namespace: "Seo" });
-  const organizationUrl = t(`organizations.${seoOrganizationId}.url`);
+  const siteName = t("siteName");
+  const organizationUrl = getSiteUrl().origin;
   const logoUrl = absoluteUrl(seoOgImagePath);
 
   const organization: JsonLdGraph = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: t(`organizations.${seoOrganizationId}.name`),
+    name: siteName,
     url: organizationUrl,
     logo: logoUrl,
-    email: t(`organizations.${seoOrganizationId}.email`),
+    email: seoContactEmail,
   };
 
   const service: JsonLdGraph = {
@@ -39,7 +40,7 @@ export async function getHomeJsonLd(locale: string) {
     description: t("services.fieldScheduling.description"),
     provider: {
       "@type": "Organization",
-      name: t(`organizations.${seoOrganizationId}.name`),
+      name: siteName,
       url: organizationUrl,
     },
     areaServed: t("services.fieldScheduling.areaServed"),
