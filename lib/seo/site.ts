@@ -1,3 +1,3 @@
-export const seoOgImagePath = "/brand/oricrew-og.png";
+export const seoOgImagePath = "/opengraph-image";
 
 export const seoContactEmail = "hello@oricrew.com";
