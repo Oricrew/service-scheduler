@@ -59,6 +59,28 @@ export function getAiEnv(): AiEnv {
   return { enabled, apiKey, model };
 }
 
+export type AiFallbackEnv = {
+  fallbackModel: string | undefined;
+  openaiApiKey: string | undefined;
+  openaiModel: string;
+  totalDeadlineMs: number;
+};
+
+export function getAiFallbackEnv(): AiFallbackEnv {
+  const rawDeadline = process.env.AI_TOTAL_DEADLINE_MS;
+  const parsedDeadline = rawDeadline ? parseInt(rawDeadline, 10) : NaN;
+
+  return {
+    fallbackModel: process.env.GEMINI_FALLBACK_MODEL?.trim() || undefined,
+    openaiApiKey: process.env.OPENAI_API_KEY?.trim() || undefined,
+    openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini",
+    totalDeadlineMs:
+      Number.isFinite(parsedDeadline) && parsedDeadline > 0
+        ? parsedDeadline
+        : 15_000,
+  };
+}
+
 export function isAiConfigured(): boolean {
   const { enabled, apiKey } = getAiEnv();
   return enabled && !!apiKey;
