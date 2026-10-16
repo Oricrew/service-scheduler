@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { Button } from "@/components/ui";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -46,8 +47,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-surface text-foreground">
+      <header className="border-b border-border bg-surface-elevated">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <Link
@@ -56,7 +57,7 @@ export default async function DashboardLayout({
             >
               {t("brand")}
             </Link>
-            <p className="mt-1 text-sm font-semibold text-slate-500">
+            <p className="mt-1 text-sm font-semibold text-muted">
               {t("subtitle")}
             </p>
           </div>
@@ -64,7 +65,7 @@ export default async function DashboardLayout({
           <nav className="flex flex-wrap gap-2">
             {navItems.map((item) => (
               <Link
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-900"
+                className="rounded-button border border-border px-4 py-2 text-sm font-bold text-foreground hover:border-primary hover:bg-primary-light hover:text-primary"
                 href={`/${currentLocale}${item.href}`}
                 key={item.href}
               >
@@ -76,12 +77,9 @@ export default async function DashboardLayout({
           <div className="flex flex-wrap items-center gap-2">
             <LanguageSwitcher currentLocale={currentLocale} />
             <form action={signOutWithLocale}>
-              <button
-                className="rounded-full bg-slate-950 px-5 py-2 text-sm font-black text-white shadow-sm hover:bg-slate-800"
-                type="submit"
-              >
+              <Button type="submit" size="sm">
                 {t("signOut")}
-              </button>
+              </Button>
             </form>
           </div>
         </div>
