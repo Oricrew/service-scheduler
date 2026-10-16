@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -7,9 +8,15 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { routing } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+import { privatePageRobots } from "@/lib/seo/metadata";
+
 import { signOut } from "../login/actions";
 
 type Locale = (typeof routing.locales)[number];
+
+export const metadata: Metadata = {
+  robots: privatePageRobots,
+};
 
 const navItems = [
   { key: "home", href: "/dashboard" },
