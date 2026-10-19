@@ -4,8 +4,15 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardHeader } from "@/components/ui";
 import { routing } from "@/i18n/routing";
+import { pageMetadata, privatePageRobots } from "@/lib/seo/metadata";
 
 type Locale = (typeof routing.locales)[number];
+
+export const generateMetadata = pageMetadata({
+  pageId: "bookConfirmation",
+  path: "book/confirmation",
+  robots: privatePageRobots,
+});
 
 export default async function BookingConfirmationPage({
   params,

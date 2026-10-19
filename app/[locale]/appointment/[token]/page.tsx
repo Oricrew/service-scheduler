@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { PageShell } from "@/components/page-shell";
+import { privatePageRobots } from "@/lib/seo/metadata";
 import { hashAppointmentToken } from "@/lib/appointment-tokens";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -30,6 +33,10 @@ type AppointmentRecord = {
 };
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: privatePageRobots,
+};
 
 function formatDateTime(value: string, locale: string, timezone: string) {
   return new Intl.DateTimeFormat(locale, {
@@ -78,6 +85,7 @@ export default async function AppointmentPage({
   params: Promise<{ locale: string; token: string }>;
 }>) {
   const { locale, token } = await params;
+  const t = await getTranslations({ locale, namespace: "AppointmentClient" });
   const appointment = await getAppointment(token);
 
   if (!appointment) {
@@ -91,30 +99,31 @@ export default async function AppointmentPage({
     <PageShell>
       <div className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
         <p className="text-sm font-black uppercase tracking-[0.22em] text-sky-700">
-          Client appointment
+          {t("eyebrow")}
         </p>
         <h1 className="mt-4 text-4xl font-black leading-none tracking-tight">
-          Appointment details
+          {t("title")}
         </h1>
         <p className="mt-4 text-sm font-bold uppercase tracking-wide text-slate-500">
-          Status: <span className="text-slate-950">{appointment.status}</span>
+          {t("statusLabel")}{" "}
+          <span className="text-slate-950">{appointment.status}</span>
         </p>
 
         <dl className="mt-8 grid gap-5 text-sm sm:grid-cols-2">
           <div>
-            <dt className="font-bold text-slate-500">Client</dt>
+            <dt className="font-bold text-slate-500">{t("fields.client")}</dt>
             <dd className="mt-1 font-semibold text-slate-950">
               {appointment.clients.name}
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">Service</dt>
+            <dt className="font-bold text-slate-500">{t("fields.service")}</dt>
             <dd className="mt-1 font-semibold text-slate-950">
               {appointment.services.name}
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">Date and time</dt>
+            <dt className="font-bold text-slate-500">{t("fields.dateTime")}</dt>
             <dd className="mt-1 font-semibold text-slate-950">
               {formatDateTime(
                 appointmentTime,
@@ -124,33 +133,35 @@ export default async function AppointmentPage({
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">Contact</dt>
+            <dt className="font-bold text-slate-500">{t("fields.contact")}</dt>
             <dd className="mt-1 font-semibold text-slate-950">
               {appointment.clients.phone}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="font-bold text-slate-500">Address</dt>
+            <dt className="font-bold text-slate-500">{t("fields.address")}</dt>
             <dd className="mt-1 font-semibold text-slate-950">
               {appointment.address}, {appointment.city}
             </dd>
           </div>
           <div>
-            <dt className="font-bold text-slate-500">Equipment</dt>
+            <dt className="font-bold text-slate-500">
+              {t("fields.equipment")}
+            </dt>
             <dd className="mt-1 font-semibold text-slate-950">
               {appointment.equipment_type}
               {appointment.brand_model ? ` - ${appointment.brand_model}` : ""}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="font-bold text-slate-500">Problem</dt>
+            <dt className="font-bold text-slate-500">{t("fields.problem")}</dt>
             <dd className="mt-1 leading-6 text-slate-700">
               {appointment.problem_description}
             </dd>
           </div>
           {appointment.client_notes ? (
             <div className="sm:col-span-2">
-              <dt className="font-bold text-slate-500">Notes</dt>
+              <dt className="font-bold text-slate-500">{t("fields.notes")}</dt>
               <dd className="mt-1 leading-6 text-slate-700">
                 {appointment.client_notes}
               </dd>
@@ -162,7 +173,7 @@ export default async function AppointmentPage({
           className="mt-8 inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800"
           href={`/${locale}`}
         >
-          Back to home
+          {t("backToHome")}
         </Link>
       </div>
     </PageShell>
