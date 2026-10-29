@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { seoOgImagePath } from "@/lib/seo/site";
+import { seoBrandName, seoOgImagePath } from "@/lib/seo/site";
 import {
   absoluteUrl,
   canonicalUrl,
@@ -37,9 +37,12 @@ async function createPageMetadata({
   robots,
 }: CreatePageMetadataOptions): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "Seo" });
-  const title = t(`pages.${pageId}.title`, values);
+  const pageTitle = t(`pages.${pageId}.title`, values);
   const description = t(`pages.${pageId}.description`, values);
   const siteName = t("siteName");
+  const isHome = pageId === "home";
+  const title = isHome ? { absolute: pageTitle } : pageTitle;
+  const fullTitle = isHome ? pageTitle : `${pageTitle} | ${seoBrandName}`;
   const ogImageUrl = absoluteUrl(seoOgImagePath);
 
   return {
@@ -55,7 +58,7 @@ async function createPageMetadata({
       locale,
       url: canonicalUrl(locale, path),
       siteName,
-      title,
+      title: fullTitle,
       description,
       images: [
         {
@@ -68,7 +71,7 @@ async function createPageMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: fullTitle,
       description,
       images: [ogImageUrl],
     },
