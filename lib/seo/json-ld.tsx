@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { seoContactEmail, seoOgImagePath } from "@/lib/seo/site";
+import { seoBrandName, seoLogoPath } from "@/lib/seo/site";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo/urls";
 
 type JsonLdGraph = Record<string, unknown>;
@@ -18,20 +18,21 @@ export function JsonLd({ data }: JsonLdProps) {
   );
 }
 
-export async function getHomeJsonLd(locale: string) {
-  const t = await getTranslations({ locale, namespace: "Seo" });
-  const siteName = t("siteName");
-  const organizationUrl = getSiteUrl().origin;
-  const logoUrl = absoluteUrl(seoOgImagePath);
-
-  const organization: JsonLdGraph = {
+export function buildOrganizationJsonLd(): JsonLdGraph {
+  return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: siteName,
-    url: organizationUrl,
-    logo: logoUrl,
-    email: seoContactEmail,
+    name: seoBrandName,
+    url: getSiteUrl().origin,
+    logo: absoluteUrl(seoLogoPath),
+    sameAs: [],
   };
+}
+
+export async function getHomeJsonLd(locale: string) {
+  const t = await getTranslations({ locale, namespace: "Seo" });
+  const organizationUrl = getSiteUrl().origin;
+  const organization = buildOrganizationJsonLd();
 
   const service: JsonLdGraph = {
     "@context": "https://schema.org",
@@ -40,7 +41,7 @@ export async function getHomeJsonLd(locale: string) {
     description: t("services.fieldScheduling.description"),
     provider: {
       "@type": "Organization",
-      name: siteName,
+      name: seoBrandName,
       url: organizationUrl,
     },
     areaServed: t("services.fieldScheduling.areaServed"),

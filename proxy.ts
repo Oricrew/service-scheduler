@@ -7,6 +7,27 @@ import { routing } from "./i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
+function withPermanentRedirect(
+  request: NextRequest,
+  response: NextResponse,
+): NextResponse {
+  if (request.nextUrl.pathname !== "/" || response.status !== 307) {
+    return response;
+  }
+
+  const location = response.headers.get("Location");
+  if (!location) {
+    return response;
+  }
+
+  const permanent = NextResponse.redirect(location, 308);
+  response.cookies.getAll().forEach((cookie) => {
+    permanent.cookies.set(cookie);
+  });
+
+  return permanent;
+}
+
 function isClientZonePath(pathname: string) {
   const clientPath = process.env.CLIENT_PATH?.trim();
 
@@ -36,7 +57,7 @@ export default async function proxy(request: NextRequest) {
 
   await supabase.auth.getUser();
 
-  return response;
+  return withPermanentRedirect(request, response);
 }
 
 export const config = {
